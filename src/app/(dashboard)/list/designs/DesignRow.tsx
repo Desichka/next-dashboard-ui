@@ -4,6 +4,8 @@ import {useState} from "react";
 import Link from "next/link";
 import Status from "@/components/Status";
 import CustomIcon from "@/components/CustomIcon";
+import {format} from "date-fns";
+
 
 type Design = {
     id: number;
@@ -12,7 +14,13 @@ type Design = {
     status: string;
     designer?: string;
     partner?: string;
-    date: string;
+    createdAt: string;
+    updatedAt: string;
+    company: { name: string };
+    employee: { username: string };
+    partners: string | null;
+    companyId: number;
+    employeeId: number;
 };
 
 interface Option {
@@ -47,6 +55,7 @@ const getStatusClass = (status: string) => {
     }
 };
 
+
 const DesignRow = ({item}: { item: Design }) => {
     const [status, setStatus] = useState(item.status);
 
@@ -55,12 +64,14 @@ const DesignRow = ({item}: { item: Design }) => {
         setStatus(newStatus);
         console.log(`Status changed to: ${newStatus}`);
     };
+    const formattedCreatedAtDate = format(item.createdAt, "dd.MM.yyyy");
+    const formattedUpdatedAtDate = format(item.updatedAt, "dd.MM.yyyy");
 
     return (
         <tr key={item.id}
             className="border-lightEmphasisColor dark:border-darkEmphasisColor border-b text-sm hover:bg-lightEmphasisColor dark:hover:bg-darkEmphasisColor">
-            <td className="h-12 px-4">{item.number}</td>
-            <td className="hidden md:table-cell px-4">{item.name}</td>
+            <td className="h-12 px-4">{item.companyId}</td>
+            <td className="hidden md:table-cell px-4">{item.company.name}</td>
             <td className="px-4">
                 <Status
                     options={Object.values(STATUS_OPTIONS)}
@@ -73,11 +84,12 @@ const DesignRow = ({item}: { item: Design }) => {
             </td>
             <td className="px-4">
                 <div className="flex flex-col">
-                    <span className="font-semibold leading-3">{item.designer}</span>
-                    <span className="text-xs font-thin">{item.partner}</span>
+                    <span className="font-semibold leading-3">{item.employee.username}</span>
+                    <span className="text-xs font-thin">{item.partners}</span>
                 </div>
             </td>
-            <td className="hidden md:table-cell px-4">{item.date}</td>
+            <td className="hidden md:table-cell px-4">{formattedCreatedAtDate}</td>
+            <td className="hidden md:table-cell px-4">{formattedUpdatedAtDate}</td>
             <td className="px-4 pt-3 flex gap-4">
                 <Link href="">
                     <button>
