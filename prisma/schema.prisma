@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  createdAt DateTime @default(now())
+  email     String?
+}
+
+model Employee {
+  id       Int       @id @default(autoincrement())
+  username String    @unique
+  name     String
+  surname  String
+  password String
+  email    String?   @unique
+  phone    String?   @unique
+  img      String?
+  birthday DateTime?
+  design   Design[]
+  events   Event[]
+  note     Note[]
+}
+
+model Design {
+  id           Int       @id @default(autoincrement())
+  companyId    Int
+  company      Company   @relation(fields: [companyId], references: [id])
+  templateName String
+  status       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  employeeId   Int
+  employee     Employee? @relation(fields: [employeeId], references: [id])
+  partners     String?
+  noteId       Int?
+  note         Note[]
+}
+
+model Company {
+  id        Int      @id @unique
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  designs   Design[]
+  Note      Note[]
+}
+
+model Event {
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  startDate  DateTime
+  endDate    DateTime
+  personal   Boolean
+  type       EventType
+  employeeId Int
+  employees  Employee  @relation(fields: [employeeId], references: [id])
+}
+
+model Note {
+  id         Int      @id @default(autoincrement())
+  companyId  Int?
+  company    Company? @relation(fields: [companyId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  content    String
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  personal   Boolean
+  temporary  Boolean
+  Design     Design?  @relation(fields: [designId], references: [id])
+  designId   Int?
+}
+
+enum EventType {
+  MEETING
+  TRAINING
+  VACATION
+  SICK_LEAVE
+  OTHER
+}

@@ -3,7 +3,7 @@ const singInPage = () => {
     <div>
       <h1>Sing In</h1>
     </div>
-  )
-}
+  );
+};
 
-export default singInPage
+export default singInPage;
