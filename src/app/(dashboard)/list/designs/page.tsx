@@ -1,16 +1,17 @@
 import { prisma } from '@/lib/prisma';
 import { ITEMS_PER_PAGE } from '@/lib/constants';
-import { Prisma, Company, Design, Employee } from '@prisma/client';
+// Import User for the relation
+import { Prisma, Company, Design, User } from '@prisma/client'; // Removed Employee import
 import DesignsClientPage from './DesignsClientPage'; // Import the client component
 
-// Re-define the DesignList type here or import from a shared types file
-type DesignList = Design & { company: Company; employee: Employee | null };
+// Update DesignList type to use User
+type DesignList = Design & { company: Company; user: User | null };
 
 // Define the expected searchParams structure for clarity
 interface DesignsPageSearchParams {
   query?: string;
   status?: string;
-  employeeId?: string;
+  userId?: string; // Filter by User ID
   createdStart?: string;
   createdEnd?: string;
   updatedStart?: string;
@@ -28,7 +29,7 @@ const DesignsPage = async ({ searchParams }: { searchParams?: DesignsPageSearchP
   // Get individual filter params
   const query = searchParams?.query || '';
   const statusFilter = searchParams?.status || '';
-  const employeeIdFilter = searchParams?.employeeId || '';
+  const userIdFilter = searchParams?.userId || ''; // Changed from employeeIdFilter
   const createdStartFilter = searchParams?.createdStart || '';
   const createdEndFilter = searchParams?.createdEnd || '';
   const updatedStartFilter = searchParams?.updatedStart || '';
@@ -41,11 +42,9 @@ const DesignsPage = async ({ searchParams }: { searchParams?: DesignsPageSearchP
   if (statusFilter) {
     whereConditions.push({ status: { equals: statusFilter, mode: 'insensitive' } });
   }
-  if (employeeIdFilter) {
-    const employeeIdInt = parseInt(employeeIdFilter, 10);
-    if (!isNaN(employeeIdInt)) {
-      whereConditions.push({ employeeId: employeeIdInt });
-    }
+  // Filter by userId (string)
+  if (userIdFilter) {
+    whereConditions.push({ userId: userIdFilter });
   }
   const createdAtFilter: Prisma.DateTimeFilter = {};
   if (createdStartFilter) createdAtFilter.gte = new Date(createdStartFilter);
@@ -66,8 +65,9 @@ const DesignsPage = async ({ searchParams }: { searchParams?: DesignsPageSearchP
     const isQueryInt = !isNaN(queryAsInt);
     const queryConditions: Prisma.DesignWhereInput[] = [
       { company: { name: { contains: query, mode: 'insensitive' } } },
-      { status: { contains: query, mode: 'insensitive' } },
-      { employee: { name: { contains: query, mode: 'insensitive' } } },
+      { status: { contains: query, mode: 'insensitive' } }, // Removed extra brace here
+      // Query against the related User's name
+      { user: { name: { contains: query, mode: 'insensitive' } } },
       { templateName: { contains: query, mode: 'insensitive' } },
     ];
     if (isQueryInt) {
@@ -79,22 +79,22 @@ const DesignsPage = async ({ searchParams }: { searchParams?: DesignsPageSearchP
   // Combine all conditions with AND
   const whereCondition: Prisma.DesignWhereInput = whereConditions.length > 0 ? { AND: whereConditions } : {};
 
-  // Fetch employees (only necessary fields)
-  const employees = await prisma.employee.findMany({
-    select: { id: true, name: true, surname: true },
-    orderBy: { name: 'asc' },
+  // Fetch users for the filter dropdown (instead of employees)
+  const users = await prisma.user.findMany({
+    select: { id: true, name: true, username: true }, // Select relevant User fields
+    orderBy: { name: 'asc' }, // Or username
   });
 
   // Fetch total count
   const totalItems = await prisma.design.count({ where: whereCondition });
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // Fetch designs for the current page
+  // Fetch designs for the current page, include user instead of employee
   const designs = await prisma.design.findMany({
     where: whereCondition,
     include: {
       company: true,
-      employee: true,
+      user: true, // Changed from employee: true
     },
     skip: (currentPage - 1) * itemsPerPage,
     take: itemsPerPage,
@@ -103,10 +103,11 @@ const DesignsPage = async ({ searchParams }: { searchParams?: DesignsPageSearchP
   // --- End of Data Fetching Logic ---
 
   // Render the Client Component, passing fetched data and searchParams as props
+  // DesignsClientPage will need to accept 'users' instead of 'employees'
   return (
     <DesignsClientPage
-      designs={designs as DesignList[]}
-      employees={employees}
+      designs={designs as DesignList[]} // Pass designs typed with User relation
+      users={users} // Pass the user list for filters
       totalItems={totalItems}
       totalPages={totalPages}
       currentPage={currentPage}

@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client'; // Import Role
+import bcrypt from 'bcryptjs'; // Import bcryptjs
 
 const prisma = new PrismaClient();
 
@@ -8,28 +9,46 @@ const statusStrings = ['NEW', 'WAITING', 'NOT_SEND', 'SEND', 'DONE'];
 async function main() {
   console.log('Start seeding...');
 
-  // --- Find or Create Employee ---
-  let employee1 = await prisma.employee.findUnique({
-    where: { username: 'seed_user' },
-  });
+  // --- Create User with Hashed Password ---
+  const username = 'seed_user';
+  const plainPassword = 'password123';
+  const hashedPassword = await bcrypt.hash(plainPassword, 10); // Hash the password
 
-  if (!employee1) {
-    console.log('Employee seed_user not found, creating...');
-    employee1 = await prisma.employee.create({
-      data: {
-        username: 'seed_user',
-        name: 'Seed',
-        surname: 'User',
-        password: 'password123', // Use a placeholder/hashed password in real scenarios
-        email: 'seed_user@example.com',
-      },
-    });
-    console.log(`Created employee: ${employee1.username}`);
-  } else {
-    console.log(`Found existing employee: ${employee1.username}`);
-  }
+  const user = await prisma.user.upsert({
+    where: { username: username },
+    update: {
+      // Optionally update fields if user exists, e.g., password hash
+      password: hashedPassword,
+      name: 'Seed',
+      email: `${username}@example.com`, // Ensure email is unique or handle conflicts
+      role: Role.EMPLOYEE, // Assign a role
+    },
+    create: {
+      username: username,
+      password: hashedPassword,
+      name: 'Seed',
+      email: `${username}@example.com`,
+      role: Role.EMPLOYEE, // Assign a role
+      // Optionally create and link Employee profile here if needed
+      // employeeProfile: {
+      //   create: {
+      //     username: username, // Can reuse username or have a different employee identifier
+      //     name: 'Seed',
+      //     surname: 'User',
+      //     // Add other Employee fields as needed
+      //   }
+      // }
+    },
+  });
+  console.log(`Upserted user: ${user.username} with role ${user.role}`);
 
   // --- Create Companies ---
+  // Note: The original seed script linked designs to an Employee ID.
+  // If you still need the Employee model separate from User for other reasons,
+  // you would create/find the Employee and link it to the User via userId.
+  // For simplicity now, we focus on the User model for authentication.
+  // Designs will be linked to the User ID later in the script.
+
   // Using manual IDs as 'id' is unique but not auto-incrementing in the schema.
   const company1 = await prisma.company.upsert({
     where: { id: 1 },
@@ -51,6 +70,7 @@ async function main() {
   console.log(`Upserted companies: ${company1.name}, ${company2.name}`);
 
   // --- Create Designs ---
+  // Link designs to the User ID
   const designData = [];
   const companies = [company1, company2];
 
@@ -62,7 +82,7 @@ async function main() {
       companyId: companies[companyIndex].id, // Use company.id
       templateName: `Seed Template ${i}`, // Provide templateName
       status: statusStrings[statusIndex], // Assign the string status
-      employeeId: employee1.id, // Assign to the created employee
+      userId: user.id, // Assign to the created User ID
       // partners: null, // Optional field
       // noteId: null,   // Optional field
     });

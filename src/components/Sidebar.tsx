@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 import CustomIcon from '@/components/CustomIcon';
 
 const menuItems = [
@@ -14,7 +17,7 @@ const menuItems = [
       {
         icon: 'employee',
         label: 'employees',
-        href: '/list/employees',
+        href: '/employees', // Corrected path
         visible: ['admin'],
       },
       {
@@ -22,6 +25,12 @@ const menuItems = [
         label: 'Designs',
         href: '/list/designs',
         visible: ['admin', 'employee'],
+      },
+      {
+        icon: 'designs', // Reusing 'designs' icon as placeholder
+        label: 'Companys',
+        href: '/list/companys',
+        visible: ['admin', 'employee'], // Assuming same visibility as Designs
       },
       {
         icon: 'newDesign',
@@ -80,30 +89,41 @@ const Sidebar = () => {
       {menuItems.map((item) => (
         <div key={item.title} className='flex items-center lg:items-start flex-col'>
           <span className='hidden lg:block mt-6 text-xs'>{item.title}</span>
-          {item.items.map((i) => (
-            <Link
-              href={i.href}
-              className='flex lg:w-full lg:min-w-[150px]  lg:hover:bg-lightHoverColor lg:hover:dark:text-darkTextColor2 lg:hover:transition justify-center items-center lg:justify-start gap-3 px-4 py-2 my-1 mx-[-16px] rounded-full'
-              key={i.href}
-            >
-              <CustomIcon
-                name={
-                  i.icon as
-                    | 'home'
-                    | 'employee'
-                    | 'designs'
-                    | 'newDesign'
-                    | 'notes'
-                    | 'calendar'
-                    | 'compare'
-                    | 'profile'
-                    | 'settings'
-                    | 'logout'
-                }
-              />
-              <span className='hidden lg:block'>{i.label}</span>
-            </Link>
-          ))}
+          {item.items.map((i) =>
+            i.label === 'Logout' ? (
+              <button
+                key={i.label}
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className='flex lg:w-full lg:min-w-[150px] lg:hover:bg-lightHoverColor lg:hover:dark:text-darkTextColor2 lg:hover:transition justify-center items-center lg:justify-start gap-3 px-4 py-2 my-1 mx-[-16px] rounded-full text-left'
+              >
+                <CustomIcon name='logout' />
+                <span className='hidden lg:block'>{i.label}</span>
+              </button>
+            ) : (
+              <Link
+                href={i.href}
+                className='flex lg:w-full lg:min-w-[150px]  lg:hover:bg-lightHoverColor lg:hover:dark:text-darkTextColor2 lg:hover:transition justify-center items-center lg:justify-start gap-3 px-4 py-2 my-1 mx-[-16px] rounded-full'
+                key={i.href}
+              >
+                <CustomIcon
+                  name={
+                    i.icon as
+                      | 'home'
+                      | 'employee'
+                      | 'designs'
+                      | 'newDesign'
+                      | 'notes'
+                      | 'calendar'
+                      | 'compare'
+                      | 'profile'
+                      | 'settings'
+                      // 'logout' is handled above
+                  }
+                />
+                <span className='hidden lg:block'>{i.label}</span>
+              </Link>
+            )
+          )}
         </div>
       ))}
     </div>

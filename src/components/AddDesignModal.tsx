@@ -5,12 +5,15 @@ import { useFormState, useFormStatus } from 'react-dom';
 import CustomIcon from './CustomIcon';
 import { addDesign, AddDesignFormState } from '@/app/actions/addDesign';
 import { STATUS_OPTIONS } from '@/lib/constants'; // Use constant array
-import { Employee } from '@prisma/client'; // Import Employee type
+// Removed Employee import
+
+// Define the type for the user data passed for filters (should match parent)
+type UserFilterData = { id: string; name: string | null; username: string };
 
 interface AddDesignModalProps {
   isOpen: boolean;
   onClose: () => void;
-  employees: Pick<Employee, 'id' | 'name' | 'surname'>[]; // Accept employees prop
+  users: UserFilterData[]; // Changed from employees to users
 }
 
 // Helper component for the submit button state
@@ -27,7 +30,7 @@ function SubmitButton() {
   );
 }
 
-const AddDesignModal: React.FC<AddDesignModalProps> = ({ isOpen, onClose, employees }) => {
+const AddDesignModal: React.FC<AddDesignModalProps> = ({ isOpen, onClose, users }) => { // Changed prop name
   const initialState: AddDesignFormState = { message: null, errors: {} };
   const [state, dispatch] = useFormState(addDesign, initialState);
   const formRef = useRef<HTMLFormElement>(null); // Ref for the form
@@ -145,29 +148,29 @@ const AddDesignModal: React.FC<AddDesignModalProps> = ({ isOpen, onClose, employ
             )}
           </div>
 
-          {/* Employee Dropdown */}
+          {/* User Dropdown */}
           <div className='mb-4'>
-            <label htmlFor='employeeId' className='block text-sm font-medium text-lightTextColor dark:text-darkTextColor mb-1'>
-              Assign Employee
+            <label htmlFor='userId' className='block text-sm font-medium text-lightTextColor dark:text-darkTextColor mb-1'>
+              Assign User {/* Changed label */}
             </label>
             <select
-              id='employeeId'
-              name='employeeId'
+              id='userId' // Changed id
+              name='userId' // Changed name
               required
-              aria-describedby='employeeId-error'
+              aria-describedby='userId-error' // Changed aria-describedby
               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-lightCardBgColor dark:bg-darkCardBgColor text-lightTextColor dark:text-darkTextColor'
               defaultValue=""
             >
-              <option value="" disabled>Select an employee</option>
-              {employees.map((employee) => (
-                <option key={employee.id} value={employee.id}>
-                  {employee.name} {employee.surname} (ID: {employee.id})
+              <option value="" disabled>Select a user</option> {/* Changed default text */}
+              {users.map((user) => ( // Changed array name
+                <option key={user.id} value={user.id}> {/* Use user.id */}
+                  {user.name || user.username} {/* Display name or username */}
                 </option>
               ))}
             </select>
-            {state.errors?.employeeId && (
-              <p id='employeeId-error' className='mt-1 text-sm text-red-600'>
-                {state.errors.employeeId.join(', ')}
+            {state.errors?.userId && ( // Changed error key
+              <p id='userId-error' className='mt-1 text-sm text-red-600'> {/* Changed id */}
+                {state.errors.userId.join(', ')} {/* Changed error key */}
               </p>
             )}
           </div>

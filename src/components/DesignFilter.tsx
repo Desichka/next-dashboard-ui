@@ -3,14 +3,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import CustomIcon from './CustomIcon';
-import { Status, Employee } from '@prisma/client'; // Import Employee type
+import { Status } from '@prisma/client'; // Removed Employee import
 
-// Define the props for the component, including the employees list
+// Define the type for the user data passed for filters (should match parent)
+type UserFilterData = { id: string; name: string | null; username: string };
+
+// Define the props for the component, including the users list
 interface DesignFilterProps {
-  employees: Pick<Employee, 'id' | 'name' | 'surname'>[];
+  users: UserFilterData[]; // Changed from employees to users
 }
 
-const DesignFilter: React.FC<DesignFilterProps> = ({ employees }) => {
+const DesignFilter: React.FC<DesignFilterProps> = ({ users }) => { // Changed prop name
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -19,7 +22,7 @@ const DesignFilter: React.FC<DesignFilterProps> = ({ employees }) => {
 
   // State for individual filter fields
   const [status, setStatus] = useState(searchParams.get('status') || '');
-  const [employeeId, setEmployeeId] = useState(searchParams.get('employeeId') || ''); // Changed state name
+  const [userId, setUserId] = useState(searchParams.get('userId') || ''); // Changed state name and param name
   const [createdStart, setCreatedStart] = useState(searchParams.get('createdStart') || '');
   const [createdEnd, setCreatedEnd] = useState(searchParams.get('createdEnd') || '');
   const [updatedStart, setUpdatedStart] = useState(searchParams.get('updatedStart') || '');
@@ -33,7 +36,7 @@ const DesignFilter: React.FC<DesignFilterProps> = ({ employees }) => {
 
     // Set or delete params based on input values
     if (status) params.set('status', status); else params.delete('status');
-    if (employeeId) params.set('employeeId', employeeId); else params.delete('employeeId');
+    if (userId) params.set('userId', userId); else params.delete('userId'); // Changed param name
     if (createdStart) params.set('createdStart', createdStart); else params.delete('createdStart');
     if (createdEnd) params.set('createdEnd', createdEnd); else params.delete('createdEnd');
     if (updatedStart) params.set('updatedStart', updatedStart); else params.delete('updatedStart');
@@ -45,14 +48,14 @@ const DesignFilter: React.FC<DesignFilterProps> = ({ employees }) => {
 
   const handleClearFilters = () => {
     setStatus('');
-    setEmployeeId('');
+    setUserId(''); // Changed state setter
     setCreatedStart('');
     setCreatedEnd('');
     setUpdatedStart('');
     setUpdatedEnd('');
     const params = new URLSearchParams(searchParams);
     params.delete('status');
-    params.delete('employeeId');
+    params.delete('userId'); // Changed param name
     params.delete('createdStart');
     params.delete('createdEnd');
     params.delete('updatedStart');
@@ -76,7 +79,7 @@ const DesignFilter: React.FC<DesignFilterProps> = ({ employees }) => {
   // Check if any filters are active to change button appearance
   const filtersActive = !!(
     searchParams.get('status') ||
-    searchParams.get('employeeId') ||
+    searchParams.get('userId') || // Changed param name
     searchParams.get('createdStart') ||
     searchParams.get('createdEnd') ||
     searchParams.get('updatedStart') ||
@@ -113,21 +116,21 @@ const DesignFilter: React.FC<DesignFilterProps> = ({ employees }) => {
                   <option value="NOT_SEND">NOT_SEND</option>
                   <option value="SEND">SEND</option>
                   <option value="DONE">DONE</option>
-                </select>
+                 </select>
             </div>
-             {/* Employee Filter */}
+             {/* User Filter */}
             <div>
-              <label htmlFor="employeeId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Employee</label>
+              <label htmlFor="userId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">User</label> {/* Changed label */}
               <select
-                id="employeeId"
-                value={employeeId}
-                onChange={(e) => setEmployeeId(e.target.value)}
+                id="userId" // Changed id
+                value={userId} // Changed value binding
+                onChange={(e) => setUserId(e.target.value)} // Changed state setter
                 className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200"
               >
-                <option value="">All Employees</option>
-                {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id.toString()}>
-                    {emp.name} {emp.surname}
+                <option value="">All Users</option> {/* Changed default text */}
+                {users.map((user) => ( // Changed array name
+                  <option key={user.id} value={user.id}> {/* Use user.id */}
+                    {user.name || user.username} {/* Display name or username */}
                   </option>
                 ))}
               </select>

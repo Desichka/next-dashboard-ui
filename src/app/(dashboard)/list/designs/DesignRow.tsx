@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Import useEffect
 // Link is no longer used directly for delete, can be removed if not used elsewhere in the file later
 // import Link from 'next/link';
 import StatusChanger from '@/components/StatusChanger';
@@ -17,10 +17,10 @@ type Design = {
   createdAt: Date;
   updatedAt: Date;
   company: { name: string };
-  employee: { username: string } | null; // Allow employee to be null
+  user: { username: string } | null; // Changed from employee
   partners: string | null;
   companyId: number;
-  employeeId: number;
+  userId: string | null; // Changed from employeeId: number
 };
 
 const STATUS_OPTIONS = {
@@ -33,9 +33,14 @@ const STATUS_OPTIONS = {
 
 const DesignRow = ({ item }: { item: Design }) => {
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
+  const [clientFormattedCreatedAt, setClientFormattedCreatedAt] = useState(''); // State for client-side formatted date
+  const [clientFormattedUpdatedAt, setClientFormattedUpdatedAt] = useState(''); // State for client-side formatted date
 
-  const formattedCreatedAtDate = format(item.createdAt, 'dd.MM.yyyy');
-  const formattedUpdatedAtDate = format(item.updatedAt, 'dd.MM.yyyy');
+  // Format dates only after component mounts on the client
+  useEffect(() => {
+    setClientFormattedCreatedAt(format(item.createdAt, 'dd.MM.yyyy'));
+    setClientFormattedUpdatedAt(format(item.updatedAt, 'dd.MM.yyyy'));
+  }, [item.createdAt, item.updatedAt]); // Re-run if item dates change
 
   const handleDeleteConfirm = async () => {
     const result = await deleteDesign(item.id);
@@ -60,14 +65,15 @@ const DesignRow = ({ item }: { item: Design }) => {
           currentStatusValue={item.status} // Pass the current status from DB
         />
       </td>
-      <td className='px-4'>
-        <div className='flex flex-col'>
-          <span className='font-semibold leading-3'>{item.employee?.username ?? 'N/A'}</span>
-          <span className='text-xs font-thin'>{item.partners}</span>
-        </div>
-      </td>
-      <td className='hidden md:table-cell px-4'>{formattedCreatedAtDate}</td>
-      <td className='hidden md:table-cell px-4'>{formattedUpdatedAtDate}</td>
+    <td className='px-4'>
+      <div className='flex flex-col'>
+        <span className='font-semibold leading-3'>{item.user?.username ?? 'N/A'}</span> {/* Changed from item.employee */}
+        <span className='text-xs font-thin'>{item.partners}</span>
+      </div>
+    </td>
+      {/* Render formatted dates from state */}
+      <td className='hidden md:table-cell px-4'>{clientFormattedCreatedAt || '...'}</td>
+      <td className='hidden md:table-cell px-4'>{clientFormattedUpdatedAt || '...'}</td>
       <td className='px-4 pt-3 flex gap-4'>
         <button onClick={() => setIsModalOpen(true)}> {/* Open modal on click */}
           <CustomIcon name='delete' />

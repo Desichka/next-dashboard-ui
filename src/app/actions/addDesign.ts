@@ -11,12 +11,9 @@ const AddDesignSchema = z.object({
     .number({ invalid_type_error: 'Company Number must be a number.' })
     .int({ message: 'Company Number must be an integer.' }) // Ensure integer
     .positive({ message: 'Company Number must be positive.' }),
-  companyName: z.string().min(1, { message: 'Company Name is required.' }), // Add companyName
+  companyName: z.string().min(1, { message: 'Company Name is required when company number is new.' }), // Added back, validation logic handled below
   templateName: z.string().min(1, { message: 'Template Name is required.' }),
-  employeeId: z.coerce
-    .number({ invalid_type_error: 'Employee ID must be a number.' })
-    .int({ message: 'Employee ID must be an integer.' }) // Ensure integer
-    .positive({ message: 'Employee ID must be positive.' }),
+  userId: z.string().cuid({ message: 'Invalid User ID format.' }), // Changed from employeeId (number) to userId (string/cuid)
   status: z.nativeEnum(Status, { // Add status validation
     errorMap: () => ({ message: 'Invalid status selected.' }),
   }),
@@ -27,9 +24,9 @@ export type AddDesignFormState = {
   message: string | null;
   errors?: {
     companyNumber?: string[];
-    companyName?: string[]; // Add companyName errors
+    companyName?: string[]; // Added back
     templateName?: string[];
-    employeeId?: string[];
+    userId?: string[]; // Changed from employeeId
     status?: string[]; // Add status errors
     partners?: string[]; // Add partners errors
     database?: string[]; // For general database errors
@@ -43,9 +40,9 @@ export async function addDesign(
   // Validate form data
   const validatedFields = AddDesignSchema.safeParse({
     companyNumber: formData.get('companyNumber'),
-    companyName: formData.get('companyName'), // Get companyName
+    companyName: formData.get('companyName'), // Added back
     templateName: formData.get('templateName'),
-    employeeId: formData.get('employeeId'),
+    userId: formData.get('userId'), // Changed from employeeId
     status: formData.get('status'), // Get status
     partners: formData.get('partners'), // Get partners
   });
@@ -58,42 +55,63 @@ export async function addDesign(
     };
   }
 
-  // Destructure all validated fields
-  const { companyNumber, companyName, templateName, employeeId, status, partners } = validatedFields.data;
+  // Destructure validated fields
+  const { companyNumber, companyName, templateName, userId, status, partners } = validatedFields.data;
 
   try {
-    // 1. Upsert Company: Find by ID (companyNumber) or create if not found
-    const company = await prisma.company.upsert({
+    // 1. Find or Create Company
+    // Try to find the company first
+    let company = await prisma.company.findUnique({
       where: { id: companyNumber },
-      update: {
-        // Optionally update name if found? For now, we only update if creating.
-        // name: companyName, // Uncomment if you want to update name of existing company
-      },
-      create: {
-        id: companyNumber, // Use the provided number as the ID for the new company
-        name: companyName, // Use the provided name for the new company
-      },
     });
 
-    // 2. Check if Employee exists (no change here)
-    const employee = await prisma.employee.findUnique({
-      where: { id: employeeId },
+    // If company not found, create it (requires companyName)
+    if (!company) {
+      if (!companyName) { // Double-check name is provided if creating
+         return {
+           message: 'Company Name is required when adding a new company number.',
+           errors: { companyName: ['Company Name cannot be empty for a new company.'] },
+         };
+      }
+      try {
+        company = await prisma.company.create({
+          data: {
+            id: companyNumber, // Use the provided number as ID
+            name: companyName,
+          },
+        });
+      } catch (e: any) {
+         // Handle potential unique constraint violation if ID already exists but wasn't found initially (race condition?)
+         if (e.code === 'P2002' && e.meta?.target?.includes('id')) {
+             return { message: 'Database Error: Company number might already exist.', errors: { companyNumber: ['This company number is already taken.'] } };
+         }
+         if (e.code === 'P2002' && e.meta?.target?.includes('name')) {
+             return { message: 'Database Error: Company name might already exist.', errors: { companyName: ['This company name is already taken.'] } };
+         }
+         throw e; // Re-throw other errors
+      }
+    }
+
+    // 2. Verify User exists (using the directly provided userId)
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true }, // Only need to confirm existence
     });
 
-    if (!employee) {
+    if (!user) {
       return {
-        message: 'Employee not found.',
-        errors: { employeeId: ['No employee found with this ID.'] },
+        message: 'Selected user not found.',
+        errors: { userId: ['The selected user does not exist.'] },
       };
     }
 
-    // 3. Create the new design with all fields
+    // 3. Create the new design using the validated userId
     await prisma.design.create({
       data: {
-        companyId: company.id, // Use the upserted company's ID
+        companyId: company.id, // Use the found or created company's ID
         templateName: templateName,
         status: status, // Use the status from the form
-        employeeId: employeeId,
+        userId: user.id, // Use the validated userId directly
         partners: partners || null, // Use partners from form, or null if empty/not provided
       },
     });

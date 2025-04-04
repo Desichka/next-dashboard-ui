@@ -8,15 +8,19 @@ import AddDesignModal from '@/components/AddDesignModal'; // Keep this
 import Table from '@/components/Table'; // Keep this
 import TableSearch from '@/components/TableSearch'; // Keep this
 import DesignRow from './DesignRow'; // Keep this
-import { Company, Design, Employee } from '@prisma/client'; // Keep types needed for props
+// Import User type
+import { Company, Design, User } from '@prisma/client'; // Removed Employee import
 
-// Define the DesignList type (can stay or be moved to types file)
-type DesignList = Design & { company: Company; employee: Employee | null };
+// Update DesignList type to use User
+type DesignList = Design & { company: Company; user: User | null };
+
+// Define the type for the user data passed for filters
+type UserFilterData = { id: string; name: string | null; username: string };
 
 // Define props for the client component
 interface DesignsClientPageProps {
   designs: DesignList[];
-  employees: Pick<Employee, 'id' | 'name' | 'surname'>[]; // Pass only necessary employee fields
+  users: UserFilterData[]; // Changed from employees to users
   totalItems: number;
   totalPages: number;
   currentPage: number;
@@ -26,7 +30,7 @@ interface DesignsClientPageProps {
   searchParams: { // Pass relevant searchParams for client components like TableSearch/DesignFilter
     query?: string;
     status?: string;
-    employeeId?: string;
+    userId?: string; // Changed from employeeId to userId
     createdStart?: string;
     createdEnd?: string;
     updatedStart?: string;
@@ -77,7 +81,7 @@ const columns = [
 // This is now the Client Component
 const DesignsClientPage: React.FC<DesignsClientPageProps> = ({
   designs,
-  employees,
+  users, // Changed from employees
   totalItems,
   totalPages,
   currentPage,
@@ -111,8 +115,8 @@ const DesignsClientPage: React.FC<DesignsClientPageProps> = ({
            {/* TableSearch might need access to searchParams or handle state internally */}
            <TableSearch placeholder="Search designs..." />
           <div className='flex items-center gap-4'>
-             {/* DesignFilter needs employees and potentially searchParams */}
-             <DesignFilter employees={employees} />
+             {/* DesignFilter needs users and potentially searchParams */}
+             <DesignFilter users={users} /> {/* Changed prop name */}
             {/* Removed the old filter button */}
             {/* <button className='w-9 h-9 flex items-center justify-center rounded-full shadow bg-lightButtonColor text-darkTextColor2 hover:bg-emerald-600'>
               <CustomIcon name='filter' className='text-lightCardBgColor dark:text-neutral-300' />
@@ -148,12 +152,12 @@ const DesignsClientPage: React.FC<DesignsClientPageProps> = ({
         itemsPerPage={itemsPerPage} // Use prop
         totalItems={totalItems}
       />
-      {/* Pass employees and key to the modal */}
+      {/* Pass users and key to the modal */}
       <AddDesignModal
         key={modalKey} // Add the key prop
         isOpen={isModalOpen}
         onClose={closeModal}
-        employees={employees}
+        users={users} // Changed prop name
       />
     </div>
   );
