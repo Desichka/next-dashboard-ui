@@ -87,3 +87,11 @@ enum EventType {
   SICK_LEAVE
   OTHER
 }
+
+enum Status {
+  NEW
+  WAITING
+  NOT_SEND
+  SEND
+  DONE
+}

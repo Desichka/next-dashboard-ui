@@ -48,8 +48,10 @@ const columns = [
 ];
 
 const DesignsPage = async ({
-                             searchParams,
-                           }: { searchParams: { [key: string]: string | string[] | undefined } }) => {
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) => {
   console.log(searchParams);
 
   // Fetch designs and include related company and employee data
@@ -64,25 +66,22 @@ const DesignsPage = async ({
   const renderRow = (item: DesignList) => <DesignRow item={item} />;
 
   return (
-    <div className="bg-lightCardBgColor dark:bg-darkCardBgColor shadow  p-4 rounded-2xl flex-1 m-4 mt-0">
+    <div className='bg-lightCardBgColor dark:bg-darkCardBgColor shadow  p-4 rounded-2xl flex-1 m-4 mt-0'>
       {/*top*/}
-      <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-xl font-semibold text-lightTextColor dark:text-darkTextColor">
+      <div className='flex items-center justify-between'>
+        <h1 className='hidden md:block text-xl font-semibold text-lightTextColor dark:text-darkTextColor'>
           Designs
         </h1>
-        <div className="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto">
+        <div className='flex flex-col md:flex-row items-center gap-6 w-full md:w-auto'>
           <TableSearch />
-          <div className="flex items-center gap-4 md:self-end">
-            <button
-              className="w-9 h-9 flex items-center justify-center rounded-full shadow bg-lightButtonColor text-darkTextColor2 hover:bg-emerald-600">
-              <CustomIcon name="filter" className="text-lightCardBgColor dark:text-neutral-300" />
+          <div className='flex items-center gap-4 md:self-end'>
+            <button className='w-9 h-9 flex items-center justify-center rounded-full shadow bg-lightButtonColor text-darkTextColor2 hover:bg-emerald-600'>
+              <CustomIcon name='filter' className='text-lightCardBgColor dark:text-neutral-300' />
             </button>
-            <button
-              className="w-9 h-9 flex items-center justify-center rounded-full shadow bg-lightButtonColor text-darkTextColor2 hover:bg-emerald-600">
-              <CustomIcon name="sort" className="text-lightCardBgColor dark:text-neutral-300" />
+            <button className='w-9 h-9 flex items-center justify-center rounded-full shadow bg-lightButtonColor text-darkTextColor2 hover:bg-emerald-600'>
+              <CustomIcon name='sort' className='text-lightCardBgColor dark:text-neutral-300' />
             </button>
-            <button
-              className="text-2xl w-9 h-9 flex items-center justify-center rounded-full shadow bg-lightActiveColor text-lightTextColor dark:text-darkCardBgColor hover:bg-emerald-600">
+            <button className='text-2xl w-9 h-9 flex items-center justify-center rounded-full shadow bg-lightActiveColor text-lightTextColor dark:text-darkCardBgColor hover:bg-emerald-600'>
               +
             </button>
           </div>

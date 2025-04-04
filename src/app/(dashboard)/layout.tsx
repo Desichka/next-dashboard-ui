@@ -4,11 +4,7 @@ import Logo from '@/components/Logo';
 import ThemeToggle from '@/components/ThemeToggle';
 import Navbar from '@/components/Navbar';
 
-export default function DashboardLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className='flex min-h-screen bg-lightBgColor dark:bg-darkBgColor text-lightTextColor dark:text-darkTextColor'>
       {/*LEFT*/}
