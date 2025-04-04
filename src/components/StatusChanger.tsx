@@ -25,7 +25,9 @@ export default function StatusChanger({ itemId, currentStatusValue }: StatusChan
   const [isLoading, setIsLoading] = useState(false); // Keep for API route example if used
   const [error, setError] = useState<string | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [openAbove, setOpenAbove] = useState(false); // State to track dropdown direction
   const dropdownRef = useRef<HTMLDivElement>(null); // Ref for detecting outside clicks
+  const buttonRef = useRef<HTMLButtonElement>(null); // Ref for the button
 
   // For Server Actions: useTransition helps manage pending states without blocking UI
   const [isPending, startTransition] = useTransition();
@@ -115,11 +117,22 @@ export default function StatusChanger({ itemId, currentStatusValue }: StatusChan
     };
   }, []);
 
+  // Calculate dropdown position when it opens
+  useEffect(() => {
+    if (isDropdownOpen && buttonRef.current && dropdownRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const dropdownHeightEstimate = dropdownRef.current.offsetHeight || 150; // Estimate or measure actual height if possible
+      const spaceBelow = window.innerHeight - buttonRect.bottom;
+
+      setOpenAbove(spaceBelow < dropdownHeightEstimate);
+    }
+  }, [isDropdownOpen]); // Re-run when dropdown opens/closes
 
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
       {/* Button to toggle dropdown */}
       <button
+        ref={buttonRef} // Add ref to the button
         type="button"
         onClick={() => !effectiveIsLoading && setIsDropdownOpen(!isDropdownOpen)} // Prevent opening when loading
         disabled={effectiveIsLoading}
@@ -134,7 +147,10 @@ export default function StatusChanger({ itemId, currentStatusValue }: StatusChan
       {/* Custom Dropdown Menu */}
       {isDropdownOpen && (
         <div
-          className="origin-top-left absolute left-0 p-2 w-auto bg-lightBgColor dark:bg-darkBgColor rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10" // Added z-10
+          ref={dropdownRef} // Add ref here too for height calculation
+          className={`absolute left-0 p-2 w-auto bg-lightBgColor dark:bg-darkBgColor rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10 ${
+            openAbove ? 'bottom-full mb-1 origin-bottom-left' : 'mt-1 origin-top-left' // Conditional positioning
+          }`}
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="menu-button" // Link to the button if it had an ID

@@ -49,11 +49,13 @@ const Status: FC<StatusProps> = ({ options, selected, onChange }) => {
       <div>
         <button
           type='button'
-          className='inline-flex w-full justify-center gap-x-1.5 rounded-full px-1.5 py-0.5 text-sm font-semibold text-xs font-semibold shadow-sm ring-current ring-[0.3px] focus:outline-none hover:shadow-inner'
+          className='inline-flex w-full justify-center gap-x-1.5 rounded-full px-1.5 py-0.5 text-xs font-semibold shadow-sm ring-current ring-[0.3px] focus:outline-none hover:shadow-inner'
           onClick={toggleDropdown}
+          aria-haspopup="true"
+          aria-expanded={isOpen}
         >
           {selectedOption && (
-            <div className={`flex items-center gap-2`}>
+            <div className='flex items-center gap-2'>
               <CustomIcon
                 name={{ category: 'status', icon: selectedOption.icon }}
                 className={`${selectedOption.color} w-3 h-3`}
@@ -65,18 +67,24 @@ const Status: FC<StatusProps> = ({ options, selected, onChange }) => {
       </div>
 
       {isOpen && (
-        <div className='absolute z-10 w-auto origin-top-right rounded-md bg-lightBgColor dark:bg-darkBgColor shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-          <div className='py-1'>
+        <div
+          className='absolute z-10 mt-1 w-auto origin-top-right rounded-md bg-lightBgColor dark:bg-darkBgColor shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
+          role="menu"
+          aria-orientation="vertical"
+          aria-labelledby="options-menu" // Assuming the button acts as the label, though ideally it would have an id
+        >
+          <div className='py-1' role="none">
             {options.map((option) => (
               <button
                 key={option.value}
                 onClick={() => handleStatusChange(option)}
-                className='px-2 py-2 text-left text-xs w-24'
+                className='block w-full px-2 py-2 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700'
+                role="menuitem"
               >
                 <div className='flex items-center gap-2'>
                   <CustomIcon
                     name={{ category: 'status', icon: option.icon }}
-                    className={`${option.color}  w-3 h-3`}
+                    className={`${option.color} w-3 h-3`} // Removed extra space before w-3
                   />
                   <span className={option.color}>{option.label}</span>
                 </div>

@@ -1,0 +1,162 @@
+'use client'; // Make this a Client Component
+
+import { useState } from 'react';
+import CustomIcon from '@/components/CustomIcon';
+import DesignFilter from '@/components/DesignFilter'; // Keep this, it's interactive
+import Pagination from '@/components/Pagination'; // Keep this
+import AddDesignModal from '@/components/AddDesignModal'; // Keep this
+import Table from '@/components/Table'; // Keep this
+import TableSearch from '@/components/TableSearch'; // Keep this
+import DesignRow from './DesignRow'; // Keep this
+import { Company, Design, Employee } from '@prisma/client'; // Keep types needed for props
+
+// Define the DesignList type (can stay or be moved to types file)
+type DesignList = Design & { company: Company; employee: Employee | null };
+
+// Define props for the client component
+interface DesignsClientPageProps {
+  designs: DesignList[];
+  employees: Pick<Employee, 'id' | 'name' | 'surname'>[]; // Pass only necessary employee fields
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  itemsPerPage: number;
+  // Pass searchParams relevant to client-side components if needed,
+  // or handle search/filter state internally if preferred
+  searchParams: { // Pass relevant searchParams for client components like TableSearch/DesignFilter
+    query?: string;
+    status?: string;
+    employeeId?: string;
+    createdStart?: string;
+    createdEnd?: string;
+    updatedStart?: string;
+    updatedEnd?: string;
+    page?: string;
+    limit?: string;
+  };
+}
+
+const columns = [
+  {
+    header: 'Company Number',
+    accessor: 'companyNumber',
+    className: 'table-cell',
+  },
+  {
+    header: 'Company Name',
+    accessor: 'company.name',
+    className: 'hidden md:table-cell',
+  },
+  {
+    header: 'Status',
+    accessor: 'status',
+    className: 'table-cell',
+  },
+  {
+    header: 'Team',
+    accessor: 'team',
+    className: 'table-cell',
+  },
+  {
+    header: 'Created',
+    accessor: 'createdAt',
+    className: 'hidden md:table-cell',
+  },
+  {
+    header: 'Updated',
+    accessor: 'updatedAt',
+    className: 'hidden md:table-cell',
+  },
+  {
+    header: 'Actions',
+    accessor: 'actions',
+    className: 'table-cell',
+  },
+];
+
+// This is now the Client Component
+const DesignsClientPage: React.FC<DesignsClientPageProps> = ({
+  designs,
+  employees,
+  totalItems,
+  totalPages,
+  currentPage,
+  itemsPerPage,
+  searchParams,
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalKey, setModalKey] = useState(0); // Add key state for resetting modal
+
+  const openModal = () => setIsModalOpen(true);
+
+  // Increment key when closing to force modal reset on next open
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalKey(prevKey => prevKey + 1);
+  };
+
+  // Data fetching is removed. Use props passed from the parent Server Component.
+
+  // The renderRow function remains the same
+  const renderRow = (item: DesignList) => <DesignRow item={item} />;
+
+  return (
+    <div className='bg-lightCardBgColor dark:bg-darkCardBgColor shadow  p-4 rounded-2xl flex-1 m-4 mt-0'>
+      {/*top*/}
+      <div className='flex items-center justify-between'>
+        <h1 className='hidden md:block text-xl font-semibold text-lightTextColor dark:text-darkTextColor'>
+          Designs
+        </h1>
+        <div className='flex flex-col md:flex-row items-center gap-4 w-full md:w-auto justify-end'>
+           {/* TableSearch might need access to searchParams or handle state internally */}
+           <TableSearch placeholder="Search designs..." />
+          <div className='flex items-center gap-4'>
+             {/* DesignFilter needs employees and potentially searchParams */}
+             <DesignFilter employees={employees} />
+            {/* Removed the old filter button */}
+            {/* <button className='w-9 h-9 flex items-center justify-center rounded-full shadow bg-lightButtonColor text-darkTextColor2 hover:bg-emerald-600'>
+              <CustomIcon name='filter' className='text-lightCardBgColor dark:text-neutral-300' />
+            </button> */}
+            {/* Sort buttons - functionality needs implementation */}
+            <button className='w-9 h-9 flex items-center justify-center rounded-full shadow bg-lightButtonColor text-darkTextColor2 hover:bg-emerald-600'>
+              <CustomIcon name='sort' className='text-lightCardBgColor dark:text-neutral-300' />
+            </button>
+            <button className='w-9 h-9 flex items-center justify-center rounded-full shadow bg-lightButtonColor text-darkTextColor2 hover:bg-emerald-600'>
+              <CustomIcon name='sort' className='text-lightCardBgColor dark:text-neutral-300' />
+            </button>
+            {/* Add button - functionality is handled by state */}
+            <button
+              onClick={openModal}
+              className='text-2xl w-9 h-9 flex items-center justify-center rounded-full shadow bg-lightActiveColor text-lightTextColor dark:text-darkCardBgColor hover:bg-emerald-600'
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </div>
+      {/*list*/}
+      {/* Table uses designs prop */}
+      <Table
+        columns={columns}
+        renderRow={renderRow}
+        data={designs} // Use designs prop
+      />
+      {/* Pagination uses props */}
+      <Pagination
+        currentPage={currentPage} // Use prop
+        totalPages={totalPages} // Use prop
+        itemsPerPage={itemsPerPage} // Use prop
+        totalItems={totalItems}
+      />
+      {/* Pass employees and key to the modal */}
+      <AddDesignModal
+        key={modalKey} // Add the key prop
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        employees={employees}
+      />
+    </div>
+  );
+};
+
+export default DesignsClientPage; // Export the renamed component

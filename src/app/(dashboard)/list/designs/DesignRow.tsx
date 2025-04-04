@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+// Link is no longer used directly for delete, can be removed if not used elsewhere in the file later
+// import Link from 'next/link';
 import StatusChanger from '@/components/StatusChanger';
 import CustomIcon from '@/components/CustomIcon';
 import { format } from 'date-fns';
+import { deleteDesign } from '@/app/actions/deleteDesign';
+import ConfirmationModal from '@/components/ConfirmationModal'; // Import the custom modal
 
 type Design = {
   id: number;
@@ -29,14 +32,25 @@ const STATUS_OPTIONS = {
 };
 
 const DesignRow = ({ item }: { item: Design }) => {
-  
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
+
   const formattedCreatedAtDate = format(item.createdAt, 'dd.MM.yyyy');
   const formattedUpdatedAtDate = format(item.updatedAt, 'dd.MM.yyyy');
 
+  const handleDeleteConfirm = async () => {
+    const result = await deleteDesign(item.id);
+    if (!result.success) {
+      console.error(result.error);
+      alert(`Error: ${result.error}`); // Keep simple alert for error feedback for now
+    }
+    // Modal is closed automatically by its own handleConfirm
+  };
+
   return (
-    <tr
-      key={item.id}
-      className='border-lightEmphasisColor dark:border-darkEmphasisColor border-b text-sm hover:bg-lightEmphasisColor dark:hover:bg-darkEmphasisColor'
+    <> {/* Wrap the entire return in a Fragment */}
+      <tr
+        key={item.id}
+        className='border-lightEmphasisColor dark:border-darkEmphasisColor border-b text-sm hover:bg-lightEmphasisColor dark:hover:bg-darkEmphasisColor'
     >
       <td className='h-12 px-4'>{item.companyId}</td>
       <td className='hidden md:table-cell px-4'>{item.company.name}</td>
@@ -55,16 +69,23 @@ const DesignRow = ({ item }: { item: Design }) => {
       <td className='hidden md:table-cell px-4'>{formattedCreatedAtDate}</td>
       <td className='hidden md:table-cell px-4'>{formattedUpdatedAtDate}</td>
       <td className='px-4 pt-3 flex gap-4'>
-        <Link href=''>
-          <button>
-            <CustomIcon name='delete' />
-          </button>
-        </Link>
+        <button onClick={() => setIsModalOpen(true)}> {/* Open modal on click */}
+          <CustomIcon name='delete' />
+        </button>
         <button>
           <CustomIcon name='details' />
         </button>
       </td>
     </tr>
+    {/* Render the modal */}
+    <ConfirmationModal
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      onConfirm={handleDeleteConfirm}
+      title='Delete Design'
+      message={`Are you sure you want to delete design ID ${item.id}? This action cannot be undone.`}
+    />
+    </> // Close the Fragment
   );
 };
 
