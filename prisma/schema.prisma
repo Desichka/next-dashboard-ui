@@ -128,6 +128,7 @@ model Note {
   temporary  Boolean
   Design     Design?  @relation(fields: [designId], references: [id])
   designId   Int?     @unique // Added unique constraint based on relation type
+  quickNote  Boolean  @default(false)
 }
 
 enum EventType {

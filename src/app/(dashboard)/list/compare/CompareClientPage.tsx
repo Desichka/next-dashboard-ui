@@ -8,10 +8,24 @@ const CompareClientPage = () => {
   const [text2, setText2] = useState('');
 
   const differences = Diff.diffChars(text1, text2);
+  const firstDiff = differences.length === 1 ? differences[0] : undefined;
+
+  const handleClear = () => {
+    setText1('');
+    setText2('');
+  };
 
   return (
     <div className='p-4'>
-      <h1 className='text-2xl font-bold mb-4'>Compare Text</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className='text-2xl font-bold'>Compare Text</h1>
+        <button
+          onClick={handleClear}
+          className='px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50'
+        >
+          Clear
+        </button>
+      </div>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
         <textarea
           value={text1}
@@ -39,10 +53,10 @@ const CompareClientPage = () => {
             </span>
           );
         })}
-        {differences.length === 1 && differences[0].count === 0 && (
+        {firstDiff && typeof firstDiff.count === 'number' && firstDiff.count === 0 && (
            <span className="text-gray-500">No differences found.</span>
         )}
-         {differences.length === 1 && differences[0].count > 0 && !differences[0].added && !differences[0].removed && text1.length > 0 && (
+         {firstDiff && typeof firstDiff.count === 'number' && firstDiff.count > 0 && !firstDiff.added && !firstDiff.removed && text1.length > 0 && (
            <span className="text-gray-500">Texts are identical.</span>
         )}
       </div>

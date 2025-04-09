@@ -56,6 +56,12 @@ const menuItems = [
         href: '/list/compare',
         visible: ['admin', 'employee'],
       },
+      {
+        icon: 'notes',
+        label: 'Notes',
+        href: '/notes',
+        visible: ['admin', 'employee'],
+      },
     ],
   },
   {
