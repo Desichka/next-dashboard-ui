@@ -35,7 +35,7 @@ const menuItems = [
       {
         icon: 'newDesign',
         label: 'New Design',
-        href: '/list/new-design',
+        href: '/designs/new', // Corrected path
         visible: ['admin', 'employee'],
       },
       {

@@ -34,7 +34,8 @@ model User {
   // Relations previously linked to Employee
   designs       Design[]
   events        Event[]
-  notes         Note[]
+  notes         Note[] // Existing Note relation
+  designChecklistItems DesignChecklistItem[] // Added relation
 }
 
 
@@ -86,8 +87,11 @@ model Design {
   userId       String? // Changed from employeeId Int to userId String - TEMPORARILY OPTIONAL
   user         User?     @relation(fields: [userId], references: [id]) // Changed relation
   partners     String?
-  noteId       Int?
-  note         Note[]
+  designNotes  String?   // Renamed from 'notes' to avoid potential conflict
+  noteId       Int?      // Existing relation field, potentially redundant?
+  note         Note[]    // Existing relation, potentially redundant?
+
+  checklistItems DesignChecklistItem[] // Added relation
 }
 
 model Company {
@@ -140,4 +144,35 @@ enum Status {
   NOT_SEND
   SEND
   DONE
+}
+
+
+// New model for Admin-managed checklist items
+model ChecklistItem {
+  id        Int      @id @default(autoincrement())
+  text      String
+  isActive  Boolean  @default(true) // Admins can hide items
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  designChecklistItems DesignChecklistItem[] // Relation to join table
+}
+
+// New join model for Design-specific checklist status and custom items
+model DesignChecklistItem {
+  id              Int      @id @default(autoincrement())
+  designId        Int
+  design          Design   @relation(fields: [designId], references: [id], onDelete: Cascade) // Cascade delete if design is deleted
+  checklistItemId Int?     // Optional: Links to a predefined ChecklistItem
+  checklistItem   ChecklistItem? @relation(fields: [checklistItemId], references: [id], onDelete: SetNull) // Set null if admin item deleted, keep the record
+  customText      String?  // Used if checklistItemId is null (employee-added item)
+  isChecked       Boolean  @default(false)
+  userId          String   // Who checked this item or added the custom one
+  user            User     @relation(fields: [userId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([designId])
+  @@index([checklistItemId])
+  @@index([userId])
 }
