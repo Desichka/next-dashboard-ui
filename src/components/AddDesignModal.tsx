@@ -2,9 +2,9 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
-import CustomIcon from './CustomIcon';
 import { addDesign, AddDesignFormState } from '@/app/actions/addDesign';
 import { STATUS_OPTIONS } from '@/lib/constants'; // Use constant array
+import UniversalModal from './UniversalModal';
 // Removed Employee import
 
 // Define the type for the user data passed for filters (should match parent)
@@ -34,7 +34,6 @@ const AddDesignModal: React.FC<AddDesignModalProps> = ({ isOpen, onClose, users 
   const initialState: AddDesignFormState = { message: null, errors: {} };
   const [state, dispatch] = useFormState(addDesign, initialState);
   const formRef = useRef<HTMLFormElement>(null); // Ref for the form
-  const modalContentRef = useRef<HTMLDivElement>(null); // Ref for modal content
 
   useEffect(() => {
     // Close modal on successful submission and reset form
@@ -45,37 +44,27 @@ const AddDesignModal: React.FC<AddDesignModalProps> = ({ isOpen, onClose, users 
     }
   }, [state.message, onClose]);
 
-  // Handle clicking outside the modal content to close
-  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (modalContentRef.current && !modalContentRef.current.contains(event.target as Node)) {
-      onClose();
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
-    // Add backdrop click handler
-    <div
-      className='fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4'
-      onClick={handleBackdropClick}
+    <UniversalModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title='Add New Design'
+      maxWidth='max-w-md' // Keep consistent width
+      footerContent={
+        <div className='flex justify-end gap-3'>
+          <button
+            type='button'
+            onClick={onClose}
+            className='px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-lightTextColor dark:text-darkTextColor hover:bg-gray-100 dark:hover:bg-gray-700'
+          >
+            Cancel
+          </button>
+          <SubmitButton /> {/* Use the helper component */}
+        </div>
+      }
     >
-      {/* Add ref to modal content div and stop propagation */}
-      <div
-        ref={modalContentRef}
-        className='bg-lightBgColor dark:bg-darkBgColor p-6 rounded-lg shadow-xl w-full max-w-md relative'
-        onClick={(e) => e.stopPropagation()} // Prevent backdrop click when clicking inside modal
-      >
-        <button
-          onClick={onClose} // Keep close button functional
-          className='absolute top-3 right-3 text-lightTextColor dark:text-darkTextColor hover:text-gray-700 dark:hover:text-gray-300'
-           aria-label='Close modal'
-         >
-           <CustomIcon name='close' className='w-5 h-5' />
-         </button>
-         <h2 className='text-xl font-semibold mb-4 text-lightTextColor dark:text-darkTextColor'>
-          Add New Design
-        </h2>
         {/* Add ref to form */}
         <form ref={formRef} action={dispatch}>
           {/* Display general form message/errors */}
@@ -220,20 +209,8 @@ const AddDesignModal: React.FC<AddDesignModalProps> = ({ isOpen, onClose, users 
             )}
           </div>
 
-          {/* Buttons */}
-          <div className='flex justify-end gap-3 mt-6'>
-            <button
-              type='button'
-              onClick={onClose}
-              className='px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-lightTextColor dark:text-darkTextColor hover:bg-gray-100 dark:hover:bg-gray-700'
-            >
-              Cancel
-            </button>
-            <SubmitButton /> {/* Use the helper component */}
-          </div>
         </form>
-      </div>
-    </div>
+    </UniversalModal>
   );
 };
 

@@ -1,3 +1,120 @@
+/* ./src/app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* --- Light Theme --- */
+    --background: 180 17% 96%; /* #F1F7F7 */
+    --foreground: 180 5% 25%; /* #3a4343 */
+
+    --card: 163 36% 91%; /* #d6eae4 */
+    --card-foreground: 180 5% 25%;
+
+    --popover: 180 17% 98%; /* Slightly lighter than background */
+    --popover-foreground: 180 5% 25%;
+
+    --primary: 154 96% 45%; /* #04DF82 */
+    --primary-foreground: 154 100% 5%; /* Dark Green/Black */
+    --primary-hover: 154 96% 40%;
+
+    --secondary: 166 94% 20%; /* #04614C */
+    --secondary-foreground: 163 100% 95%; /* Near White */
+
+    --muted: 160 33% 88%; /* #b7d8ca */
+    --muted-foreground: 180 5% 45%; /* Lighter Text */
+
+    --accent: 154 96% 45%; /* Same as primary in this example */
+    --accent-foreground: 154 100% 5%;
+    --accent-hover: 154 96% 80% / 0.5; /* rgba(4,223,130,0.5) */
+
+    --destructive: 0 84% 60%; /* Bright Red */
+    --destructive-foreground: 0 0% 100%; /* White */
+
+    /* --- NEW: Success --- */
+    --success: 145 70% 45%; /* Medium Green */
+    --success-foreground: 145 20% 98%; /* Very Light Green/White */
+
+    /* --- NEW: Warning --- */
+    --warning: 45 95% 55%; /* Bright Yellow/Orange */
+    --warning-foreground: 45 50% 15%; /* Dark Brown/Black */
+
+    /* --- NEW: Info --- */
+    --info: 210 90% 55%; /* Bright Blue */
+    --info-foreground: 210 20% 98%; /* Very Light Blue/White */
+
+    --border: 163 36% 85%; /* Light Gray-Green */
+    --input: 163 36% 80%; /* Slightly darker Input Border */
+    --ring: 154 96% 45%; /* Primary color for focus */
+
+    /* --- NEW: Optional Subtle Variations --- */
+    --background-subtle: 180 17% 94%; /* Slightly darker than main bg */
+    --border-subtle: 163 36% 88%; /* Slightly lighter than main border */
+
+    --radius: 0.75rem;
+    /* --font-sans: ... */
+    /* --font-mono: ... */
+  }
+
+  .dark {
+    /* --- Dark Theme --- */
+    --background: 180 60% 4%; /* #041010 */
+    --foreground: 180 5% 60%; /* #717D7D - Adjusted slightly lighter for better contrast */
+
+    --card: 180 70% 6%; /* #031b1b */
+    --card-foreground: 180 5% 60%;
+
+    --popover: 180 70% 5%; /* Slightly darker than dark card */
+    --popover-foreground: 180 5% 60%;
+
+    --primary: 154 96% 45%; /* #04DF82 */
+    --primary-foreground: 154 100% 5%; /* Dark Green/Black */
+    --primary-hover: 154 96% 50%; /* Slightly lighter */
+
+    --secondary: 166 94% 20%; /* #04614C */
+    --secondary-foreground: 163 100% 95%; /* Near White */
+
+    --muted: 166 35% 13%; /* #142e28 */
+    --muted-foreground: 180 5% 50%; /* Lighter muted text */
+
+    --accent: 154 96% 45%; /* #04DF82 */
+    --accent-foreground: 154 100% 5%;
+    --accent-hover: 154 96% 45% / 0.1; /* rgba(4,223,130,0.1) */
+
+    --destructive: 0 72% 51%; /* Darker Red */
+    --destructive-foreground: 0 0% 95%; /* Light Gray/White */
+
+    /* --- NEW: Success (Dark) --- */
+    --success: 145 70% 30%; /* Darker Green */
+    --success-foreground: 145 20% 90%; /* Light Green/Gray */
+
+    /* --- NEW: Warning (Dark) --- */
+    --warning: 45 95% 40%; /* Darker Yellow/Orange */
+    --warning-foreground: 45 30% 90%; /* Light Yellow/Gray */
+
+    /* --- NEW: Info (Dark) --- */
+    --info: 210 90% 45%; /* Darker Blue */
+    --info-foreground: 210 20% 90%; /* Light Blue/Gray */
+
+    --border: 166 35% 15%; /* #142e28 Adjusted slightly */
+    --input: 166 35% 18%; /* Slightly lighter input border */
+    --ring: 154 96% 45%; /* Primary color for focus */
+
+    /* --- NEW: Optional Subtle Variations (Dark) --- */
+    --background-subtle: 180 60% 6%; /* Slightly lighter than main dark bg */
+    --border-subtle: 166 35% 18%; /* Slightly lighter than main dark border */
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+    /* @apply font-sans; */
+  }
+  * {
+     @apply border-border;
+  }
+}

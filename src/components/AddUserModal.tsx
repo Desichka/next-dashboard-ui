@@ -2,79 +2,99 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
-import CustomIcon from './CustomIcon';
-import { addUser, AddUserFormState } from '@/app/actions/addUser'; // Import the user action (to be created)
-import { Role } from '@prisma/client'; // Import Role enum
+import { upsertUser, UserFormState } from '@/app/actions/addUser'; // Use renamed action and state type
+import { Role, type User as PrismaUser } from '@prisma/client'; // Import Role enum and PrismaUser
+import UniversalModal from './UniversalModal';
+
+// Define the type for the user data passed for editing
+// Ensure this matches the structure passed from EmployeesClientPage
+type User = Pick<
+  PrismaUser,
+  'id' | 'username' | 'name' | 'email' | 'role'
+>;
 
 interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // onSubmit prop might not be needed if using useFormState directly for submission feedback
+  userToEdit?: User | null; // Optional user data for editing
 }
 
-// Helper component for the submit button state
-function SubmitButton() {
+// Define props for the helper button component separately
+interface SubmitButtonProps {
+  isEditMode: boolean;
+} // <-- Close the interface definition here
+
+// Helper component for the submit button state using arrow function syntax
+const SubmitButton: React.FC<SubmitButtonProps> = ({ isEditMode }) => {
   const { pending } = useFormStatus();
+  const buttonText = isEditMode ? 'Update User' : 'Add User';
+  const pendingText = isEditMode ? 'Updating...' : 'Adding...';
   return (
     <button
       type='submit'
       disabled={pending}
       className='px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 shadow disabled:opacity-50 disabled:cursor-not-allowed'
     >
-      {pending ? 'Adding...' : 'Add User'}
+      {pending ? pendingText : buttonText}
     </button>
   );
-}
+};
 
-const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose }) => {
-  const initialState: AddUserFormState = { message: null, errors: {} };
-  const [state, dispatch] = useFormState(addUser, initialState);
+const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, userToEdit }) => {
+  const isEditMode = !!userToEdit;
+  const initialState: UserFormState = { message: null, errors: {} }; // Use renamed state type
+  // Pass userToEdit to the action if needed, or handle via hidden input
+  const [state, dispatch] = useFormState(upsertUser, initialState); // Use renamed action
   const formRef = useRef<HTMLFormElement>(null);
-  const modalContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Close modal on successful submission and reset form
-    if (state.message === 'User added successfully!') {
+    console.log('[AddUserModal] Form state changed:', state);
+    // Close modal on successful submission (handle both add/update messages)
+    // Assuming the action returns a message containing "successfully" on success
+    if (state.message?.includes('successfully!')) {
+      console.log('[AddUserModal] Success detected, closing modal.');
       onClose();
-      formRef.current?.reset();
+      // Reset form only if NOT in edit mode, or if desired after edit
+      if (!isEditMode) {
+         formRef.current?.reset();
+      }
+      // Consider if form should reset after successful edit
     }
-  }, [state.message, onClose]);
+  }, [state.message, onClose, isEditMode]);
 
-  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (modalContentRef.current && !modalContentRef.current.contains(event.target as Node)) {
-      onClose();
+  // Reset form state when modal opens for ADD mode or when userToEdit changes
+  useEffect(() => {
+    if (isOpen && !isEditMode) {
+      formRef.current?.reset();
+      // Optionally reset the form state if useFormState doesn't handle it automatically
+      // dispatch({ type: 'RESET_FORM_STATE' }); // Requires action modification
     }
-  };
+    // If switching between users to edit, ensure form resets or updates correctly
+    // This might require more complex state management if useFormState persists state across renders
+  }, [isOpen, isEditMode, userToEdit]);
+
 
   if (!isOpen) return null;
 
+  const modalTitle = isEditMode ? `Edit User: ${userToEdit.username}` : 'Add New User';
+
   return (
-    <div
-      className='fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4'
-      onClick={handleBackdropClick}
+    <UniversalModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={modalTitle}
+      maxWidth='max-w-md'
     >
-      <div
-        ref={modalContentRef}
-        className='bg-lightBgColor dark:bg-darkBgColor p-6 rounded-lg shadow-xl w-full max-w-md relative'
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          className='absolute top-3 right-3 text-lightTextColor dark:text-darkTextColor hover:text-gray-700 dark:hover:text-gray-300'
-          aria-label='Close modal'
-        >
-          <CustomIcon name='close' className='w-5 h-5' />
-        </button>
-        <h2 className='text-xl font-semibold mb-4 text-lightTextColor dark:text-darkTextColor'>
-          Add New User
-        </h2>
-        <form ref={formRef} action={dispatch}>
+        <form ref={formRef} action={dispatch} onSubmit={() => console.log(`[AddUserModal] Form submitted (${isEditMode ? 'Edit' : 'Add'} mode).`)}>
+          {/* Hidden input for user ID in edit mode */}
+          {isEditMode && <input type='hidden' name='userId' value={userToEdit.id} />}
+
           {/* Display general form message/errors */}
-          {state.message && !state.errors?.username && !state.errors?.password && !state.errors?.role && !state.errors?.database && (
-            <p className={`mb-4 text-sm ${state.message.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>
-              {state.message}
-            </p>
-          )}
+          {state.message && !state.message.includes('successfully!') && !state.errors?.database && (
+             <p className='mt-2 mb-4 text-sm text-red-600'>
+               {state.message}
+             </p>
+           )}
           {state.errors?.database && (
             <p className='mb-4 text-sm text-red-600'>{state.errors.database.join(', ')}</p>
           )}
@@ -82,15 +102,17 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose }) => {
           {/* Username */}
           <div className='mb-4'>
             <label htmlFor='username' className='block text-sm font-medium text-lightTextColor dark:text-darkTextColor mb-1'>
-              Username <span className="text-red-500">*</span>
+              Username <span className="text-red-500">*</span> {isEditMode && <span className="text-xs text-gray-500">(Cannot be changed)</span>}
             </label>
             <input
               type='text'
               id='username'
               name='username'
               required
+              defaultValue={isEditMode ? userToEdit.username : ''}
+              readOnly={isEditMode} // Make username read-only in edit mode
               aria-describedby='username-error'
-              className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-lightCardBgColor dark:bg-darkCardBgColor text-lightTextColor dark:text-darkTextColor'
+              className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-lightCardBgColor dark:bg-darkCardBgColor text-lightTextColor dark:text-darkTextColor ${isEditMode ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''}`} // Style read-only field
             />
             {state.errors?.username && (
               <p id='username-error' className='mt-1 text-sm text-red-600'>
@@ -102,26 +124,28 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose }) => {
           {/* Name (Optional) */}
           <div className='mb-4'>
             <label htmlFor='name' className='block text-sm font-medium text-lightTextColor dark:text-darkTextColor mb-1'>
-              Full Name (Optional)
+              Full Name
             </label>
             <input
               type='text'
               id='name'
               name='name'
+              defaultValue={isEditMode ? userToEdit.name ?? '' : ''}
               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-lightCardBgColor dark:bg-darkCardBgColor text-lightTextColor dark:text-darkTextColor'
             />
-             {/* No specific error message needed for optional field unless validation fails */}
+            {/* Add error display if name validation is added */}
           </div>
 
           {/* Email (Optional) */}
           <div className='mb-4'>
             <label htmlFor='email' className='block text-sm font-medium text-lightTextColor dark:text-darkTextColor mb-1'>
-              Email (Optional)
+              Email
             </label>
             <input
               type='email'
               id='email'
               name='email'
+              defaultValue={isEditMode ? userToEdit.email ?? '' : ''}
               aria-describedby='email-error'
               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-lightCardBgColor dark:bg-darkCardBgColor text-lightTextColor dark:text-darkTextColor'
             />
@@ -135,14 +159,15 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose }) => {
           {/* Password */}
           <div className='mb-4'>
             <label htmlFor='password' className='block text-sm font-medium text-lightTextColor dark:text-darkTextColor mb-1'>
-              Password <span className="text-red-500">*</span>
+              Password {isEditMode ? <span className="text-xs text-gray-500">(Leave blank to keep current)</span> : <span className="text-red-500">*</span>}
             </label>
             <input
               type='password'
               id='password'
               name='password'
-              required
-              minLength={6} // Example: Enforce minimum password length
+              required={!isEditMode} // Only required when adding
+              minLength={isEditMode ? undefined : 6} // Only enforce minLength when adding or if password is provided
+              placeholder={isEditMode ? 'Leave blank to keep current password' : ''}
               aria-describedby='password-error'
               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-lightCardBgColor dark:bg-darkCardBgColor text-lightTextColor dark:text-darkTextColor'
             />
@@ -162,12 +187,14 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose }) => {
               id='role'
               name='role'
               required
-              defaultValue={Role.EMPLOYEE} // Default to EMPLOYEE
+              defaultValue={isEditMode ? userToEdit.role : Role.EMPLOYEE}
               aria-describedby='role-error'
               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-lightCardBgColor dark:bg-darkCardBgColor text-lightTextColor dark:text-darkTextColor'
             >
+              {/* Explicitly list roles */}
               <option value={Role.ADMIN}>Admin</option>
               <option value={Role.EMPLOYEE}>Employee</option>
+              {/* Add other roles if they exist */}
             </select>
             {state.errors?.role && (
               <p id='role-error' className='mt-1 text-sm text-red-600'>
@@ -176,20 +203,19 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose }) => {
             )}
           </div>
 
-          {/* Buttons */}
-          <div className='flex justify-end gap-3 mt-6'>
+          {/* Buttons moved inside the form */}
+          <div className='flex justify-end gap-3 mt-6'> {/* Added mt-6 for spacing */}
             <button
-              type='button'
+              type='button' // Important: Keep type="button" for cancel
               onClick={onClose}
               className='px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-lightTextColor dark:text-darkTextColor hover:bg-gray-100 dark:hover:bg-gray-700'
             >
               Cancel
             </button>
-            <SubmitButton />
+            <SubmitButton isEditMode={isEditMode} /> {/* Pass mode to button */}
           </div>
         </form>
-      </div>
-    </div>
+    </UniversalModal>
   );
 };
 

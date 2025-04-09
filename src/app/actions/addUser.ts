@@ -6,19 +6,30 @@ import { Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth/next'; // Import getServerSession
-import { authOptions } from '@/lib/auth'; // Import authOptions
+import { authOptions } from '@/lib/auth';
 
-// Define the schema for form validation using Zod
-const UserSchema = z.object({
+// Define the base schema parts
+const BaseUserSchema = z.object({
+  userId: z.string().optional(), // Added for identifying user to update
   username: z.string().min(3, 'Username must be at least 3 characters long.'),
-  name: z.string().optional(), // Optional field
-  email: z.string().email('Invalid email address.').optional().or(z.literal('')), // Optional, allow empty string
-  password: z.string().min(6, 'Password must be at least 6 characters long.'),
+  name: z.string().optional(),
+  email: z.string().email('Invalid email address.').optional().or(z.literal('')),
   role: z.nativeEnum(Role, { errorMap: () => ({ message: 'Invalid role selected.' }) }),
 });
 
+// Schema for adding a user (password required)
+const AddUserSchema = BaseUserSchema.extend({
+  password: z.string().min(6, 'Password must be at least 6 characters long.'),
+});
+
+// Schema for updating a user (password optional, but validated if present)
+const UpdateUserSchema = BaseUserSchema.extend({
+  password: z.string().min(6, 'Password must be at least 6 characters long.').optional().or(z.literal('')), // Optional, allow empty string, but validate length if provided
+});
+
+
 // Define the state structure for useFormState
-export interface AddUserFormState {
+export interface UserFormState { // Renamed for clarity
   message: string | null;
   errors?: {
     username?: string[];
@@ -26,95 +37,155 @@ export interface AddUserFormState {
     email?: string[];
     password?: string[];
     role?: string[];
-    database?: string[]; // For general database errors
+    // Removed duplicate database field, keeping the one below
+    database?: string[]; // For general database/authorization errors
   };
 }
 
-export async function addUser(
-  prevState: AddUserFormState,
+// Combined function to handle both adding and updating users
+export async function upsertUser( // Renamed for clarity
+  prevState: UserFormState,
   formData: FormData
-): Promise<AddUserFormState> {
-  // 1. Check if the current user is an Admin
-  const session = await getServerSession(authOptions); // Use getServerSession
+): Promise<UserFormState> {
+  const rawFormData = Object.fromEntries(formData.entries());
+  console.log('[upsertUser Action] Received form data:', rawFormData);
+
+  const userId = formData.get('userId') as string | null;
+  const isUpdate = !!userId;
+  const actionVerb = isUpdate ? 'update' : 'add';
+  const actionGerund = isUpdate ? 'updating' : 'adding';
+
+  // 1. Authorization Check (Admin only)
+  const session = await getServerSession(authOptions);
+  console.log(`[upsertUser Action] Session check for ${actionGerund} user:`, session);
   if (session?.user?.role !== Role.ADMIN) {
+    console.error(`[upsertUser Action] Authorization failed. User role: ${session?.user?.role}`);
     return {
-      message: 'Unauthorized: Only admins can add users.',
+      message: `Unauthorized: Only admins can ${actionVerb} users.`,
       errors: { database: ['Permission denied.'] },
     };
   }
 
-  // 2. Validate form data
-  const validatedFields = UserSchema.safeParse({
+  // 2. Validate form data based on mode (Add vs Update)
+  const SchemaToUse = isUpdate ? UpdateUserSchema : AddUserSchema;
+  const validatedFields = SchemaToUse.safeParse({
+    userId: userId, // Include userId for validation context if needed
     username: formData.get('username'),
-    name: formData.get('name') || undefined, // Handle empty string for optional field
-    email: formData.get('email') || undefined, // Handle empty string for optional field
-    password: formData.get('password'),
+    name: formData.get('name') || undefined,
+    email: formData.get('email') || undefined,
+    password: formData.get('password'), // Will be validated based on schema
     role: formData.get('role'),
   });
 
-  // If validation fails, return errors
   if (!validatedFields.success) {
-    console.log('Validation Errors:', validatedFields.error.flatten().fieldErrors);
+    console.error(`[upsertUser Action] Validation Errors (${actionGerund}):`, validatedFields.error.flatten().fieldErrors);
     return {
-      message: 'Failed to add user. Please check the fields.',
+      message: `Failed to ${actionVerb} user. Please check the fields.`,
       errors: validatedFields.error.flatten().fieldErrors,
     };
   }
 
   const { username, name, email, password, role } = validatedFields.data;
+  const finalEmail = email || null; // Use null for empty/undefined email
 
-  // 3. Hash the password
-  const hashedPassword = await bcrypt.hash(password, 10); // Salt rounds = 10
-
-  // 4. Insert data into the database
+  // 3. Database Operation (Create or Update)
   try {
-    // Check if username or email already exists (if email is provided)
-    const existingUser = await prisma.user.findFirst({
-        where: {
-            OR: [
-                { username: username },
-                // Only check email if it's provided and not an empty string
-                ...(email ? [{ email: email }] : []),
-            ],
-        },
-        select: { username: true, email: true } // Select only needed fields
-    });
+    if (isUpdate && userId) {
+      // --- UPDATE LOGIC ---
+      console.log(`[upsertUser Action] Attempting to update user ID: ${userId}`);
 
-    if (existingUser) {
-        const errors: AddUserFormState['errors'] = {};
-        if (existingUser.username === username) {
-            errors.username = ['Username already taken.'];
+      // Check if email is being changed and if the new email conflicts with another user
+      if (finalEmail) {
+        const conflictingUser = await prisma.user.findFirst({
+          where: {
+            email: finalEmail,
+            id: { not: userId }, // Exclude the current user being updated
+          },
+          select: { id: true },
+        });
+        if (conflictingUser) {
+          console.warn(`[upsertUser Action] Email conflict detected for user ID: ${userId}`);
+          return {
+            message: 'Failed to update user.',
+            errors: { email: ['Email already in use by another user.'] },
+          };
         }
-        if (email && existingUser.email === email) {
-            errors.email = ['Email already in use.'];
-        }
-        return {
-            message: 'Failed to add user.',
-            errors: errors,
-        };
+      }
+
+      // Prepare update data - only include fields that are being changed
+      const updateData: { name?: string | null; email?: string | null; password?: string; role?: Role } = {};
+      if (name !== undefined) updateData.name = name || null;
+      if (email !== undefined) updateData.email = finalEmail; // Use finalEmail (can be null)
+      if (password) { // Only update password if a new one is provided
+        updateData.password = await bcrypt.hash(password, 10);
+      }
+      if (role) updateData.role = role;
+
+
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+      });
+      console.log('[upsertUser Action] User updated successfully:', updatedUser);
+
+    } else {
+      // --- CREATE LOGIC ---
+      console.log('[upsertUser Action] Attempting to create new user...');
+
+      // Check for existing username or email
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { username: username },
+            ...(finalEmail ? [{ email: finalEmail }] : []),
+          ],
+        },
+        select: { username: true, email: true },
+      });
+
+      if (existingUser) {
+        const errors: UserFormState['errors'] = {};
+        if (existingUser.username === username) errors.username = ['Username already taken.'];
+        if (finalEmail && existingUser.email === finalEmail) errors.email = ['Email already in use.'];
+        console.warn('[upsertUser Action] User already exists:', errors);
+        return { message: 'Failed to add user.', errors: errors };
+      }
+
+      // Hash password (required for add)
+      const hashedPassword = await bcrypt.hash(password!, 10); // Non-null assertion ok due to AddUserSchema validation
+
+      const newUser = await prisma.user.create({
+        data: {
+          username: username,
+          name: name || null,
+          email: finalEmail,
+          password: hashedPassword,
+          role: role,
+        },
+      });
+      console.log('[upsertUser Action] User created successfully:', newUser);
     }
 
-
-    await prisma.user.create({
-      data: {
-        username: username,
-        name: name || null, // Store null if name is empty/undefined
-        email: email || null, // Store null if email is empty/undefined
-        password: hashedPassword,
-        role: role,
-        // emailVerified can be set later if implementing email verification
-      },
-    });
   } catch (error) {
-    console.error('Database Error:', error);
+    console.error(`[upsertUser Action] Database Error during ${actionGerund}:`, error);
     return {
-      message: 'Database Error: Failed to add user.',
-      errors: { database: ['An unexpected error occurred.'] },
+      message: `Database Error: Failed to ${actionVerb} user.`,
+      errors: { database: ['An unexpected database error occurred.'] },
     };
   }
 
-  // 5. Revalidate the cache for the employees page and redirect/return success
-  revalidatePath('/(dashboard)/employees'); // Adjust path as needed
+  // 4. Revalidate Path
+  try {
+    console.log(`[upsertUser Action] Revalidating path: /employees after ${actionGerund}`);
+    revalidatePath('/(dashboard)/employees');
+    console.log('[upsertUser Action] Path revalidated.');
+  } catch (revalError) {
+    console.error('[upsertUser Action] Failed to revalidate path:', revalError);
+    // Log error but proceed
+  }
 
-  return { message: 'User added successfully!' };
+  // 5. Return Success
+  const successMessage = isUpdate ? 'User updated successfully!' : 'User added successfully!';
+  console.log(`[upsertUser Action] Returning success state: ${successMessage}`);
+  return { message: successMessage };
 }

@@ -30,7 +30,6 @@ model User {
   sessions      Session[]
 
   // Relation to Employee specific data (if role is EMPLOYEE)
-  employeeProfile Employee?
 
   // Relations previously linked to Employee
   designs       Design[]
@@ -38,20 +37,6 @@ model User {
   notes         Note[]
 }
 
-// Employee specific data, linked to User
-model Employee {
-  id        Int       @id @default(autoincrement()) // Keep original ID if needed elsewhere, but link via userId
-  userId    String?   @unique // Link to the User model - TEMPORARILY OPTIONAL
-  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade) // Enforce relation - TEMPORARILY OPTIONAL
-
-  username  String    @unique
-  name      String    // Kept here, but could be moved to User.name
-  surname   String    // Kept here
-  phone     String?   @unique
-  birthday  DateTime?
-  // Removed: password, email, img (moved to User)
-  // Removed: design[], events[], note[] (moved to User)
-}
 
 // NextAuth.js Models
 model Account {

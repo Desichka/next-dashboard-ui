@@ -2,12 +2,12 @@
 
 'use client';
 
-import React, { useState } from 'react'; // Removed useTransition
+import React, { useState } from 'react';
 import { type User as PrismaUser, Role } from '@prisma/client';
-import AddUserModal from '@/components/AddUserModal'; // Import the modal
-import ConfirmationModal from '@/components/ConfirmationModal'; // Import confirmation modal
+import AddUserModal from '@/components/AddUserModal';
+import ConfirmationModal from '@/components/ConfirmationModal';
+import Table from '@/components/Table'; // Import the universal Table component
 import { deleteUser } from '@/app/actions/deleteUser'; // Import the delete action
-
 // Define the type for the user data passed as props, selecting specific fields
 type User = Pick<
   PrismaUser,
@@ -20,12 +20,25 @@ interface EmployeesClientPageProps {
 
 const EmployeesClientPage: React.FC<EmployeesClientPageProps> = ({ users }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for edit modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  // Removed isPending and deleteError state, modal will handle it
+  const [selectedUserForEdit, setSelectedUserForEdit] = useState<User | null>(null); // State for user being edited
 
-  const openAddModal = () => setIsAddModalOpen(true);
+  const openAddModal = () => {
+    setSelectedUserForEdit(null); // Ensure we are adding, not editing
+    setIsAddModalOpen(true);
+  };
   const closeAddModal = () => setIsAddModalOpen(false);
+
+  const openEditModal = (user: User) => {
+    setSelectedUserForEdit(user);
+    setIsEditModalOpen(true);
+  };
+  const closeEditModal = () => {
+    setSelectedUserForEdit(null);
+    setIsEditModalOpen(false);
+  };
 
   const openDeleteModal = (userId: string) => {
     setSelectedUserId(userId);
@@ -50,10 +63,10 @@ const EmployeesClientPage: React.FC<EmployeesClientPageProps> = ({ users }) => {
     // This handler might not be strictly needed anymore if AddUserModal uses useFormState
     // for its submission logic and feedback. Keeping it as a placeholder.
     console.log('Creating user:', userData);
-    // This handler might not be strictly needed anymore if AddUserModal uses useFormState
-    // for its submission logic and feedback. Keeping it as a placeholder.
-    console.log('Creating user:', userData);
-    closeAddModal();
+    // This handler is likely managed within AddUserModal via useFormState
+    console.log('Handling create/update user:', userData);
+    closeAddModal(); // Close add modal if it was open
+    closeEditModal(); // Close edit modal if it was open
   };
 
   // Make the function async and return the structure expected by the modal
@@ -81,6 +94,43 @@ const EmployeesClientPage: React.FC<EmployeesClientPageProps> = ({ users }) => {
     // The ConfirmationModal handles closing itself based on the returned promise result.
   };
 
+  // Define columns for the Table component
+  const columns = [
+    { header: 'Username', accessor: 'username', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
+    { header: 'Name', accessor: 'name', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
+    { header: 'Email', accessor: 'email', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
+    { header: 'Role', accessor: 'role', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
+    { header: 'Created At', accessor: 'createdAt', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
+    { header: 'Actions', accessor: 'actions', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
+  ];
+
+  // Define the renderRow function for the Table component
+  const renderRow = (user: User) => (
+    <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-200 dark:border-gray-700">
+      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.username}</td>
+      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.name || '-'}</td>
+      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.email || '-'}</td>
+      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.role}</td>
+      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
+      <td className="px-4 py-2 whitespace-nowrap text-sm font-medium">
+        <button
+          onClick={() => openDeleteModal(user.id)}
+          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+          aria-label={`Delete user ${user.username}`}
+        >
+          Delete
+        </button>
+        <button
+          onClick={() => openEditModal(user)}
+          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ml-4" // Added margin
+          aria-label={`Edit user ${user.username}`}
+        >
+          Edit
+        </button>
+      </td>
+    </tr>
+  );
+
   return (
     <div className="p-4 md:p-6 bg-gray-100 dark:bg-gray-900 rounded-lg shadow">
       <div className="flex justify-between items-center mb-4">
@@ -95,51 +145,24 @@ const EmployeesClientPage: React.FC<EmployeesClientPageProps> = ({ users }) => {
         </button>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm">
-          <thead className="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Username</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Role</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Created At</th>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-600">
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.username}</td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.name || '-'}</td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.email || '-'}</td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.role}</td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => openDeleteModal(user.id)}
-                    className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                    aria-label={`Delete user ${user.username}`}
-                  >
-                    Delete
-                  </button>
-                  {/* Add Edit button/logic here if needed */}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* Replace the direct table implementation with the universal Table component */}
+      <Table<User>
+        columns={columns}
+        data={users}
+        renderRow={renderRow}
+      />
 
-      {/* Modals */}
-      {isAddModalOpen && (
+      {/* Add/Edit Modal */}
+      {(isAddModalOpen || isEditModalOpen) && (
         <AddUserModal
-          isOpen={isAddModalOpen}
-          onClose={closeAddModal}
-          // onSubmit is handled internally by the modal via useFormState now
+          isOpen={isAddModalOpen || isEditModalOpen}
+          onClose={isEditModalOpen ? closeEditModal : closeAddModal}
+          userToEdit={selectedUserForEdit} // Pass user data for editing
+          // onSubmit logic is likely handled internally by AddUserModal
         />
       )}
 
+      {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && selectedUserId && (
         <ConfirmationModal
           isOpen={isDeleteModalOpen}

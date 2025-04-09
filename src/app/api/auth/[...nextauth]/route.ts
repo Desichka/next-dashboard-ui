@@ -73,24 +73,60 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt', // Using JWT for session strategy
   },
   callbacks: {
-    async jwt({ token, user, account, profile }) {
-      // Persist the user role and id to the token right after signin
+    async jwt({ token, user, trigger, session: updateSessionData }) { // Add trigger and session params for update logic
+      // Initial sign in
       if (user) {
-        // On sign in, user object is available. Ensure role is correctly typed.
         token.id = user.id;
-        token.role = user.role; // Role comes from the user object (potentially augmented type)
+        token.role = user.role;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image; // Use 'picture' standard claim for image
       }
-      return token; // The token now contains id and role
+
+      // If the session was updated (e.g., by useSession().update() or profile update action)
+      // Or just on every JWT read to keep it fresh (more robust but slightly more DB reads)
+      // Let's refresh on every read for simplicity here.
+      // We need the user ID from the token (usually in token.sub or token.id)
+      const userId = token.id || token.sub; // Use token.id if we set it, otherwise standard token.sub
+
+      if (userId) {
+          try {
+              const freshUser = await prisma.user.findUnique({
+                  where: { id: userId as string },
+                  select: { name: true, email: true, image: true, role: true }
+              });
+
+              if (freshUser) {
+                  token.name = freshUser.name;
+                  token.email = freshUser.email;
+                  token.picture = freshUser.image;
+                  token.role = freshUser.role;
+                  // Ensure id is still present if it wasn't from initial sign in
+                  if (!token.id) token.id = userId;
+              } else {
+                  // Handle case where user might have been deleted? Return null or original token?
+                  console.warn(`User with ID ${userId} not found in DB during JWT refresh.`);
+                  // Returning original token might be safer than invalidating session immediately
+              }
+          } catch (error) {
+              console.error("Error fetching fresh user data for JWT:", error);
+              // Return original token to avoid breaking session on DB error
+          }
+      }
+
+      return token;
     },
-    async session({ session, token, user }) {
-      // Send role and id properties to the client side session object
-      // token object contains the data added in the jwt callback
+    async session({ session, token }) { // User param is often redundant with JWT strategy
+      // Send properties from the (potentially refreshed) token to the client session object
       if (token && session.user) {
-        session.user.id = token.id; // id is already on token from jwt callback
-        session.user.role = token.role; // role is already on token from jwt callback
+        session.user.id = token.id as string;
+        session.user.role = token.role; // Role enum should be serializable
+        // Add other fields from token to session user
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.image = token.picture; // Map token.picture back to session.user.image
       }
-      // console.log("Session created/retrieved:", session); // Keep for debugging if needed
-      return session; // The session object now contains id and role
+      return session;
     }
   },
   pages: {
