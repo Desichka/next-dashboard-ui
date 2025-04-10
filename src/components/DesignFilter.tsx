@@ -90,26 +90,25 @@ const DesignFilter: React.FC<DesignFilterProps> = ({ users }) => { // Changed pr
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className={`w-9 h-9 flex items-center justify-center rounded-full shadow ${filtersActive ? 'bg-blue-500 hover:bg-blue-600' : 'bg-lightButtonColor hover:bg-emerald-600'} text-lightCardBgColor dark:text-neutral-300 transition-colors`}
+        className={`w-11 h-11 flex items-center justify-center rounded-full shadow-sm ${filtersActive ? 'bg-accent-hover text-primary-hover' : 'bg-input text-imput hover:bg-accent-hover'} text-lightCardBgColor  transition-colors`}
         aria-haspopup="true"
         aria-expanded={isOpen}
       >
-        <CustomIcon name='filter' />
+        <CustomIcon name='filter'/>
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 origin-top-right rounded-md shadow-lg bg-lightCardBgColor dark:bg-darkCardBgColor ring-1 ring-black ring-opacity-5 focus:outline-none z-10 p-4">
-          <h3 className="text-lg font-medium mb-4 text-lightTextColor dark:text-darkTextColor">Filter Designs</h3>
+        <div className="absolute right-0 mt-2 w-auto bg-popover text-popover-foreground origin-top-right rounded-md shadow-lg  ring-1 ring-black ring-opacity-5 focus:outline-none z-10 p-4">
+          <h3 className='border-b pb-2'>Filter</h3>
           <div className="space-y-4">
              {/* Status Filter */}
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+              <label htmlFor="status">Status</label>
                <select
                  id="status"
                  value={status}
                  onChange={(e) => setStatus(e.target.value)}
-                 className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200"
-                >
+                 >
                   <option value="">All Statuses</option>
                   <option value="NEW">NEW</option>
                   <option value="WAITING">WAITING</option>
@@ -120,13 +119,12 @@ const DesignFilter: React.FC<DesignFilterProps> = ({ users }) => { // Changed pr
             </div>
              {/* User Filter */}
             <div>
-              <label htmlFor="userId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">User</label> {/* Changed label */}
+              <label htmlFor="userId">User</label> {/* Changed label */}
               <select
                 id="userId" // Changed id
                 value={userId} // Changed value binding
                 onChange={(e) => setUserId(e.target.value)} // Changed state setter
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200"
-              >
+                >
                 <option value="">All Users</option> {/* Changed default text */}
                 {users.map((user) => ( // Changed array name
                   <option key={user.id} value={user.id}> {/* Use user.id */}
@@ -137,57 +135,53 @@ const DesignFilter: React.FC<DesignFilterProps> = ({ users }) => { // Changed pr
             </div>
              {/* Created At Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Created Between</label>
+              <label >Created Between</label>
               <div className="flex space-x-2 mt-1">
                 <input
                   type="date"
                   id="createdStart"
                   value={createdStart}
                   onChange={(e) => setCreatedStart(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200"
-                />
+                  />
                 <input
                   type="date"
                   id="createdEnd"
                   value={createdEnd}
                   onChange={(e) => setCreatedEnd(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200"
-                />
+                  />
               </div>
             </div>
              {/* Updated At Filter */}
              <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Updated Between</label>
+              <label>Updated Between</label>
               <div className="flex space-x-2 mt-1">
                 <input
                   type="date"
                   id="updatedStart"
                   value={updatedStart}
                   onChange={(e) => setUpdatedStart(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200"
-                />
+                  />
                 <input
                   type="date"
                   id="updatedEnd"
                   value={updatedEnd}
                   onChange={(e) => setUpdatedEnd(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-gray-200"
-                />
+                  />
               </div>
             </div>
           </div>
-          <div className="mt-6 flex justify-end space-x-3">
+          <div className="mt-6 flex justify-end space-x-3 text-sm">
              <button
               type="button"
               onClick={handleClearFilters}
-              className="inline-flex justify-center rounded-md border border-transparent bg-gray-200 dark:bg-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+              className="inline-flex justify-center rounded-full px-4 py-2 bg-muted text-muted-foreground hover:bg-muted-hover transition-colors duration-200 ease-in-out"
             >
               Clear
             </button>
             <button
               type="button"
               onClick={handleApplyFilters}
-              className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+              className="inline-flex justify-center rounded-full px-4 py-2 bg-accent text-accent-foreground hover:bg-accent-hover transition-colors duration-200 ease-in-out"
             >
               Apply Filters
             </button>

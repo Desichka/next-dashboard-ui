@@ -19,7 +19,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <ThemeToggle />
       </div>
       {/*RIGHT*/}
-      <div className='w-[85%]'>
+      <div className='w-[85%] px-2 md:px-4 lg:px-8'>
         <Navbar />
         {children}
       </div>

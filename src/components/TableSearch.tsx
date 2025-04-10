@@ -32,7 +32,7 @@ const TableSearch: React.FC<TableSearchProps> = ({ placeholder }) => {
       </label>
       <input
         id="search"
-        className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:placeholder:text-gray-400"
+        className="peer block w-full  py-[9px] pl-10 text-sm "
         placeholder={placeholder}
         onChange={(e) => handleSearch(e.target.value)}
         defaultValue={searchParams.get('query')?.toString()}

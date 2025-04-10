@@ -22,6 +22,7 @@ function SubmitButton() {
   return (
     <button
       type='submit'
+      form="add-design-form" // Add form attribute
       disabled={pending}
       className='px-4 py-2 rounded-md bg-lightActiveColor text-lightTextColor dark:text-darkCardBgColor hover:bg-emerald-600 shadow disabled:opacity-50 disabled:cursor-not-allowed'
     >
@@ -65,8 +66,8 @@ const AddDesignModal: React.FC<AddDesignModalProps> = ({ isOpen, onClose, users 
         </div>
       }
     >
-        {/* Add ref to form */}
-        <form ref={formRef} action={dispatch}>
+        {/* Add ref and id to form */}
+        <form ref={formRef} id="add-design-form" action={dispatch}>
           {/* Display general form message/errors */}
           {state.message && !state.errors && (
              <p className={`mb-4 text-sm ${state.message.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>

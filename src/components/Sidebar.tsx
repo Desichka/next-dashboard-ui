@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation'; // Import usePathname
 import { signOut } from 'next-auth/react';
 import CustomIcon from '@/components/CustomIcon';
 
@@ -17,7 +18,7 @@ const menuItems = [
       {
         icon: 'employee',
         label: 'employees',
-        href: '/employees', // Corrected path
+        href: '/list/employees', // Corrected path
         visible: ['admin'],
       },
       {
@@ -35,7 +36,7 @@ const menuItems = [
       {
         icon: 'newDesign',
         label: 'New Design',
-        href: '/designs/new', // Corrected path
+        href: '/list/designs/new', // Corrected path
         visible: ['admin', 'employee'],
       },
       {
@@ -54,12 +55,6 @@ const menuItems = [
         icon: 'compare',
         label: 'Compare',
         href: '/list/compare',
-        visible: ['admin', 'employee'],
-      },
-      {
-        icon: 'notes',
-        label: 'Notes',
-        href: '/notes',
         visible: ['admin', 'employee'],
       },
     ],
@@ -90,6 +85,8 @@ const menuItems = [
 ];
 
 const Sidebar = () => {
+  const pathname = usePathname(); // Get current pathname
+
   return (
     <div className=''>
       {menuItems.map((item) => (
@@ -100,15 +97,17 @@ const Sidebar = () => {
               <button
                 key={i.label}
                 onClick={() => signOut({ callbackUrl: '/' })}
-                className='flex lg:w-full lg:min-w-[150px] lg:hover:bg-lightHoverColor lg:hover:dark:text-darkTextColor2 lg:hover:transition justify-center items-center lg:justify-start gap-3 px-4 py-2 my-1 mx-[-16px] rounded-full text-left'
+                className='flex lg:w-full lg:min-w-[150px] justify-center items-center lg:justify-start gap-3 px-4 py-2 my-1 mx-[-16px] rounded-full text-left hover:bg-primary-hover hover:transition-all duration-200 ease-in-out'
               >
-                <CustomIcon name='logout' />
+                <CustomIcon name='logout' className='w-[15px] h-[15px]' />
                 <span className='hidden lg:block'>{i.label}</span>
               </button>
             ) : (
               <Link
                 href={i.href}
-                className='flex lg:w-full lg:min-w-[150px]  lg:hover:bg-lightHoverColor lg:hover:dark:text-darkTextColor2 lg:hover:transition justify-center items-center lg:justify-start gap-3 px-4 py-2 my-1 mx-[-16px] rounded-full'
+                className={`flex lg:w-full lg:min-w-[150px] hover:bg-primary-hover justify-center items-center lg:justify-start gap-3 px-4 py-2 my-1 mx-[-16px] rounded-full  hover:transition-all duration-200 ease-in-out ${
+                  pathname === i.href ? 'bg-primary text-primary-foreground hover:bg-primary-hover  hover:transition-all duration-200 ease-in-out' : '' // Add conditional background
+                }`}
                 key={i.href}
               >
                 <CustomIcon
@@ -124,7 +123,7 @@ const Sidebar = () => {
                       | 'profile'
                       | 'settings'
                       // 'logout' is handled above
-                  }
+                  } className='w-[15px] h-[15px]' // Adjusted size for mobile
                 />
                 <span className='hidden lg:block'>{i.label}</span>
               </Link>

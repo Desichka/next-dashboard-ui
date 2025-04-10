@@ -21,20 +21,20 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
 
   return (
     <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300 ease-in-out'
+      className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20 backdrop-blur-sm transition-opacity duration-300 ease-in-out'
       onClick={onClose} // Close on overlay click
       role='dialog'
       aria-modal='true'
       aria-labelledby={title ? 'modal-title' : undefined}>
       {/* Stop propagation to prevent closing when clicking inside the modal content */}
       <div
-        className={`bg-lightBg dark:bg-darkBg p-6 rounded-lg shadow-xl ${maxWidth} w-full relative max-h-[90vh] overflow-y-auto flex flex-col transition-transform duration-300 ease-in-out transform scale-95 opacity-0 animate-modal-enter`}
+        className={`bg-popover text-popover-foreground p-6 rounded-lg shadow-xl ${maxWidth} w-full relative max-h-[90vh] overflow-y-auto flex flex-col transition-transform duration-300 ease-in-out transform scale-95 opacity-0 animate-modal-enter`}
         onClick={(e) => e.stopPropagation()} // Prevent overlay click handler
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className='absolute top-3 right-3 text-lightTextColor dark:text-darkTextColor hover:text-gray-700 dark:hover:text-gray-300 z-10 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700'
+          className='absolute top-3 right-3 z-10 p-1 rounded-full hover:bg-accent-hover'
           aria-label='Close modal'>
           <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' strokeWidth={1.5} stroke='currentColor' className='w-6 h-6'>
             <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
@@ -43,7 +43,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
 
         {/* Optional Title */}
         {title && (
-          <h2 id='modal-title' className='text-lg font-semibold text-lightTextColor dark:text-darkTextColor mb-4'>
+          <h2 id='modal-title' className='text-lg font-semibold mb-4'>
             {title}
           </h2>
         )}
@@ -55,7 +55,7 @@ const UniversalModal: React.FC<UniversalModalProps> = ({
 
         {/* Optional Footer */}
         {footerContent && (
-          <div className='mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3'>
+          <div className='mt-auto pt-4 border-t flex justify-end gap-3'>
             {footerContent}
           </div>
         )}

@@ -9,15 +9,15 @@ const Table = <T,>({
 }) => {
   return (
     <div className='my-9 overflow-scroll lg:overflow-auto text-lightTextColor dark:text-darkTextColor shadow-lg rounded-2xl bg-clip-border'>
-      <table className='w-full text-left table-auto min-w-max'>
+      <table className='w-full text-left table-auto min-w-max bg-card text-card-foreground'>
         <thead>
-          <tr className='h-12'>
+          <tr className=''>
             {columns.map((column) => (
               <th
                 key={column.accessor}
-                className={`px-4 border-b bg-lightEmphasisColor dark:bg-darkEmphasisColor border-neutral-300 dark:border-neutral-600 ${column.className}`}
+                className={`px-4 pt-3 border-b bg-popover ${column.className}`}
               >
-                <p className='text-sm font-bold leading-none'>{column.header}</p>
+                <p className='text-sm font-bold'>{column.header}</p>
               </th>
             ))}
           </tr>

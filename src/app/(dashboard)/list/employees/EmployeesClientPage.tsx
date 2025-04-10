@@ -7,7 +7,8 @@ import { type User as PrismaUser, Role } from '@prisma/client';
 import AddUserModal from '@/components/AddUserModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Table from '@/components/Table'; // Import the universal Table component
-import { deleteUser } from '@/app/actions/deleteUser'; // Import the delete action
+import { deleteUser } from '@/app/actions/deleteUser';
+import CustomIcon from '@/components/CustomIcon'; // Import the delete action
 // Define the type for the user data passed as props, selecting specific fields
 type User = Pick<
   PrismaUser,
@@ -96,52 +97,51 @@ const EmployeesClientPage: React.FC<EmployeesClientPageProps> = ({ users }) => {
 
   // Define columns for the Table component
   const columns = [
-    { header: 'Username', accessor: 'username', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
-    { header: 'Name', accessor: 'name', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
-    { header: 'Email', accessor: 'email', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
-    { header: 'Role', accessor: 'role', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
-    { header: 'Created At', accessor: 'createdAt', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
-    { header: 'Actions', accessor: 'actions', className: 'px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider' },
+    { header: 'Username', accessor: 'username',  },
+    { header: 'Name', accessor: 'name',  },
+    { header: 'Email', accessor: 'email',  },
+    { header: 'Role', accessor: 'role',  },
+    { header: 'Created At', accessor: 'createdAt',  },
+    { header: 'Actions', accessor: 'actions',  },
   ];
 
   // Define the renderRow function for the Table component
   const renderRow = (user: User) => (
-    <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-200 dark:border-gray-700">
-      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.username}</td>
-      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.name || '-'}</td>
-      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.email || '-'}</td>
-      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.role}</td>
-      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
-      <td className="px-4 py-2 whitespace-nowrap text-sm font-medium">
+    <tr key={user.id} className='border-lightEmphasisColor dark:border-darkEmphasisColor border-b text-sm hover:bg-lightEmphasisColor dark:hover:bg-darkEmphasisColor'>
+      <td className="px-4 h-12">{user.username}</td>
+      <td className="px-4">{user.name || '-'}</td>
+      <td className="px-4 ">{user.email || '-'}</td>
+      <td className="px-4 ">{user.role}</td>
+      <td className="px-4 ">{new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
+      <td className="px-4 gap-4 pt-3 flex">
         <button
           onClick={() => openDeleteModal(user.id)}
-          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
           aria-label={`Delete user ${user.username}`}
         >
-          Delete
+          <CustomIcon name='delete' />
         </button>
         <button
           onClick={() => openEditModal(user)}
-          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ml-4" // Added margin
+          
           aria-label={`Edit user ${user.username}`}
         >
-          Edit
+          <CustomIcon name='details' />
         </button>
       </td>
     </tr>
   );
 
   return (
-    <div className="p-4 md:p-6 bg-gray-100 dark:bg-gray-900 rounded-lg shadow">
+    <div className="">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-100">
+        <h1 className="">
           Manage Users
         </h1>
         <button
           onClick={openAddModal}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          className="bg-accent rounded-full shadow-md text-xl font-semibold px-4 py-2  text-accent-foreground hover:bg-accent-hover transition duration-200 ease-in-out"
         >
-          Add New User
+          +
         </button>
       </div>
 

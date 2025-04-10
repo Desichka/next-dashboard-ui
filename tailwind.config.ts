@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-import { fontFamily } from 'tailwindcss/defaultTheme'; // Import default fonts
+import { fontFamily } from 'tailwindcss/defaultTheme';
 
 const config: Config = {
   darkMode: 'class', // Keep using class-based dark mode
@@ -58,15 +58,6 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))', // Card background (your cardBgColor)
           foreground: 'hsl(var(--card-foreground))', // Card text (usually same as foreground)
         },
-
-        // --- You can keep your old names for compatibility if needed, ---
-        // --- but it's better to migrate to the semantic names above ---
-        // lightBgColor: '#F1F7F7',
-        // lightCardBgColor: '#d6eae4',
-        // ... etc
-        // darkBgColor: '#041010',
-        // darkCardBgColor: '#031b1b',
-        // ... etc
       },
 
       // --- Border Radius ---
@@ -125,10 +116,9 @@ const config: Config = {
   },
   // --- Plugins ---
   plugins: [
-    require('tailwindcss-animate'), // Plugin for keyframes/animations (install it: npm i -D tailwindcss-animate)
-    // Consider adding other plugins like:
-    // require('@tailwindcss/typography'), // For styling markdown/prose
-    // require('@tailwindcss/forms'), // For better form styling defaults
+    require('tailwindcss-animate'),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
   ],
 };
 export default config;
