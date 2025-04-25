@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
 import "./globals.css";
+// FullCalendar CSS might be included automatically by its components
 import AuthProvider from "@/components/AuthProvider"; // Import the provider
 
 const inter = Urbanist({ subsets: ["latin"] });

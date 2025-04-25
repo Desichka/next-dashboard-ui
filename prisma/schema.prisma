@@ -25,13 +25,12 @@ model User {
   role          Role      @default(EMPLOYEE) // Added Role field
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  vacationDays  Int?      @default(20) // Added vacation days, default to 20 (adjust as needed)
 
   accounts      Account[]
   sessions      Session[]
 
-  // Relation to Employee specific data (if role is EMPLOYEE)
-
-  // Relations previously linked to Employee
+  // Relations
   designs       Design[]
   events        Event[]
   notes         Note[] // Existing Note relation
@@ -109,10 +108,13 @@ model Event {
   updatedAt  DateTime  @updatedAt
   startDate  DateTime
   endDate    DateTime
-  personal   Boolean
+  title      String    // Added title field
+  description String?   // Added description field
+  allDay     Boolean?  // Added allDay field (optional)
+  color      String?   // Added color field (optional)
   type       EventType
-  userId     String? // Changed from employeeId Int to userId String - TEMPORARILY OPTIONAL
-  user       User?     @relation(fields: [userId], references: [id]) // Changed relation
+  userId     String    // Made userId required
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade) // Made relation required, added cascade delete
 }
 
 model Note {
@@ -131,12 +133,13 @@ model Note {
   quickNote  Boolean  @default(false)
 }
 
+// Updated EventType enum to match frontend usage
 enum EventType {
   MEETING
-  TRAINING
   VACATION
-  SICK_LEAVE
   OTHER
+  HOLIDAY // Added HOLIDAY type (consider if these should be stored differently)
+  // Removed TRAINING, SICK_LEAVE for now, can be added back if needed
 }
 
 enum Status {

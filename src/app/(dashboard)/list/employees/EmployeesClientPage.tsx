@@ -7,6 +7,7 @@ import { type User as PrismaUser, Role } from '@prisma/client';
 import AddUserModal from '@/components/AddUserModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Table from '@/components/Table'; // Import the universal Table component
+import TableSearch from '@/components/TableSearch'; // Import TableSearch
 import { deleteUser } from '@/app/actions/deleteUser';
 import CustomIcon from '@/components/CustomIcon'; // Import the delete action
 // Define the type for the user data passed as props, selecting specific fields
@@ -132,20 +133,26 @@ const EmployeesClientPage: React.FC<EmployeesClientPageProps> = ({ users }) => {
   );
 
   return (
-    <div className="">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="">
-          Manage Users
+    <div className=''>
+      {/*top*/}
+      <div className='flex items-center justify-between'>
+        <h1>
+          Employees
         </h1>
-        <button
-          onClick={openAddModal}
-          className="bg-accent rounded-full shadow-md text-xl font-semibold px-4 py-2  text-accent-foreground hover:bg-accent-hover transition duration-200 ease-in-out"
-        >
-          +
-        </button>
+        <div className='flex flex-col md:flex-row items-center gap-4 w-full md:w-auto justify-end'>
+           <TableSearch placeholder="Search employees..." />
+          <div className='flex items-center gap-4'>
+             {/* No filter component for employees yet */}
+            <button
+              onClick={openAddModal}
+              className="bg-accent rounded-full shadow-md text-xl font-semibold px-4 py-2  text-accent-foreground hover:bg-accent-hover transition duration-200 ease-in-out"
+            >
+              +
+            </button>
+          </div>
+        </div>
       </div>
-
-      {/* Replace the direct table implementation with the universal Table component */}
+      {/*list*/}
       <Table<User>
         columns={columns}
         data={users}

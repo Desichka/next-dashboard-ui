@@ -60,30 +60,45 @@ const NotesPage = () => {
   };
 
   return (
-    <div>
-      <h1>Notes</h1>
-      <div>
-        <h2>Quick Chat</h2>
-        <div style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
+    <div className=''>
+      {/*top*/}
+      <div className='flex items-center justify-between'>
+        <h1>
+          Notes
+        </h1>
+        {/* No actions needed on the right for this page */}
+      </div>
+
+      {/* Chat Section */}
+      <div className='mt-5'> {/* Add some margin top */}
+        <h2 className='text-lg font-semibold mb-2'>Quick Chat</h2>
+        {/* Message Display Area */}
+        <div className='border border-borderColor rounded p-3 mb-3 h-64 overflow-y-auto bg-secondary dark:bg-secondary-dark'>
           {messages.map((message, index) => (
-            <div key={index} style={{ backgroundColor: '#f0f0f0', padding: '5px', borderRadius: '5px', marginBottom: '5px' }}>
+            <div key={index} className='bg-lightEmphasisColor dark:bg-darkEmphasisColor p-2 rounded mb-2 text-sm'>
               {message}
             </div>
           ))}
+           {messages.length === 0 && <p className="text-gray-500 italic">No messages yet.</p>}
         </div>
-        <div>
+        {/* Input Area */}
+        <div className='flex gap-2'>
           <input
             type="text"
             value={newMessage}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder="Type your message..."
-            style={{ marginRight: '10px' }}
+            className='flex-grow p-2 border rounded bg-inputBgColor text-textColor border-borderColor focus:outline-none focus:ring-1 focus:ring-accent'
           />
-          <button onClick={handleSendMessage}>Send</button>
+          <button
+            onClick={handleSendMessage}
+            className="px-4 py-2 bg-accent text-accent-foreground rounded hover:bg-accent-hover transition duration-200 ease-in-out"
+          >
+            Send
+          </button>
         </div>
       </div>
-      {/* Add your notes content here */}
     </div>
   );
 };

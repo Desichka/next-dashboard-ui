@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next'; // Import getServerSession
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'; // Import authOptions
+import { authOptions } from '@/lib/auth'; // Import authOptions from the correct location
 import { Prisma } from '@prisma/client'; // For types
 
 // Define the expected input structure for checklist items from the client

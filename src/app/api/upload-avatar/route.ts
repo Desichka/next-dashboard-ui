@@ -3,7 +3,7 @@ import { writeFile, mkdir } from 'fs/promises'; // Import mkdir as well
 import path from 'path';
 // Remove incorrect auth import
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'; // Correct path to authOptions
+import { authOptions } from '@/lib/auth'; // Import authOptions from the correct location
 
 export async function POST(request: Request) {
   // 1. Check Authentication

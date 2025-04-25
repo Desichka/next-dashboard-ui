@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'; // Adjust path if needed
+import { authOptions } from '@/lib/auth'; // Import authOptions from the correct location
 import { redirect } from 'next/navigation';
 import { Role } from '@prisma/client'; // Import Role enum
 

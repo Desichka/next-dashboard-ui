@@ -277,9 +277,9 @@ const NewDesignClientPage: React.FC<NewDesignClientPageProps> = ({
 
   // --- Rendering ---
   return (
-    <div className="container mx-auto p-4 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg shadow-md">
+    <div className=''> {/* Use simple root div */}
       {/* Search Bar */}
-      <div className="mb-6 relative">
+      <div className="mb-4 relative"> {/* Reduced bottom margin */}
         <label htmlFor="search" className="block text-sm font-medium mb-1">Search Existing Designs</label>
         <input
           type="text"
@@ -305,7 +305,8 @@ const NewDesignClientPage: React.FC<NewDesignClientPageProps> = ({
         )}
       </div>
 
-      <h1 className="text-2xl font-bold mb-6 text-center">{isEditing ? 'Edit Design' : 'Create New Design'}</h1>
+      {/* Use standard h1 styling, remove text-center and mb-6 */}
+      <h1 className="text-2xl font-bold mb-4">{isEditing ? 'Edit Design' : 'Create New Design'}</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Company Input Mode Toggle */}

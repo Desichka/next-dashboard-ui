@@ -81,33 +81,39 @@ export default function CompanysClientPage({
   ];
 
   return (
-    <> {/* Wrap in fragment to include modal */}
-      <div className="bg-secondary dark:bg-secondary-dark p-5 rounded-lg mt-5">
-        <div className="flex items-center justify-between mb-5">
-          <TableSearch placeholder="Search for a company..." /> {/* Removed onSearch prop */}
-          {/* Add Button */}
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-3 py-2 bg-lightActiveColor text-lightTextColor dark:text-darkCardBgColor rounded-md shadow hover:bg-emerald-600"
-          >
-            Add New Company
-          </button>
+    <div className=''>
+      {/*top*/}
+      <div className='flex items-center justify-between'>
+        <h1>
+          Companies
+        </h1>
+        <div className='flex flex-col md:flex-row items-center gap-4 w-full md:w-auto justify-end'>
+           <TableSearch placeholder="Search companies..." />
+          <div className='flex items-center gap-4'>
+             {/* No filter component for companies yet */}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-accent rounded-full shadow-md text-xl font-semibold px-4 py-2  text-accent-foreground hover:bg-accent-hover transition duration-200 ease-in-out"
+            >
+              +
+            </button>
+          </div>
         </div>
-        <Table<Company>
-          columns={columns}
+      </div>
+      {/*list*/}
+      <Table<Company>
+        columns={columns}
         data={companys}
         renderRow={(company) => <CompanyRow key={company.id} item={company} />} // Using CompanyRow
-        // renderRow={(company) => <PlaceholderCompanyRow key={company.id} item={company} />} // Using placeholder - Removed
       />
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
         itemsPerPage={itemsPerPage}
-          totalItems={totalItems} // Added totalItems
-        />
-      </div>
+        totalItems={totalItems} // Added totalItems
+      />
       {/* Render the modal */}
       <AddCompanyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </>
+    </div>
   );
 }
