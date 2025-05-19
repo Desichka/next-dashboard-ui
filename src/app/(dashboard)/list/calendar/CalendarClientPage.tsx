@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid'; // For month, week, day, multi-month views
 import timeGridPlugin from '@fullcalendar/timegrid'; // For time grid views
-import listPlugin from '@fullcalendar/list';       // For list view
+import listPlugin from '@fullcalendar/list'; // For list view
 import interactionPlugin from '@fullcalendar/interaction'; // For dateClick, select, eventDrag, etc.
 import { EventInput, DateSelectArg, EventClickArg, CalendarApi } from '@fullcalendar/core';
 import { EventType } from '@prisma/client';
@@ -84,8 +84,8 @@ const CalendarClientPage = () => {
         setEvents(processedEvents);
         setVacationDays(fetchedVacationDays);
       } catch (err) {
-        console.error("Failed to fetch initial data:", err);
-        setError("Could not load calendar data. Please try again later.");
+        console.error('Failed to fetch initial data:', err);
+        setError('Could not load calendar data. Please try again later.');
         setEvents([]);
         setVacationDays(0);
       } finally {
@@ -113,13 +113,14 @@ const CalendarClientPage = () => {
   const handleEventClick = useCallback((clickInfo: EventClickArg) => {
     // Prevent editing holidays (assuming type is stored in extendedProps)
     if (clickInfo.event.extendedProps.type === 'holiday') {
-      console.log("Cannot edit holiday events.");
+      console.log('Cannot edit holiday events.');
       // Optionally show a message to the user
       return;
     }
 
     setModalData({
-      event: { // Pass the clicked event data to the modal
+      event: {
+        // Pass the clicked event data to the modal
         id: clickInfo.event.id,
         title: clickInfo.event.title,
         start: clickInfo.event.startStr, // Use string representations or Date objects
@@ -140,32 +141,38 @@ const CalendarClientPage = () => {
 
   // --- Handler for saving (adding or updating) an event ---
   // Note: EventModal needs to be adapted to pass data in this format
-  const handleSaveEvent = useCallback(async (eventData: Omit<MyFullCalendarEvent, 'id' | 'extendedProps'> & { id?: string; extendedProps?: Partial<MyFullCalendarEvent['extendedProps']> }) => {
-    setError(null);
-    const isUpdating = !!eventData.id;
+  const handleSaveEvent = useCallback(
+    async (
+      eventData: Omit<MyFullCalendarEvent, 'id' | 'extendedProps'> & {
+        id?: string;
+        extendedProps?: Partial<MyFullCalendarEvent['extendedProps']>;
+      }
+    ) => {
+      setError(null);
+      const isUpdating = !!eventData.id;
 
-    // Prepare data for server action (similar to before)
-    const dataToSend = {
-      title: eventData.title,
-      startDate: new Date(eventData.start), // Ensure Date objects
-      endDate: eventData.end ? new Date(eventData.end) : new Date(eventData.start), // Handle optional end
-      allDay: eventData.allDay,
-      color: eventData.color,
-      description: eventData.extendedProps?.description,
-      type: (eventData.extendedProps?.type?.toUpperCase() ?? 'OTHER') as EventType,
-      id: isUpdating ? Number(eventData.extendedProps?.originalId) : undefined, // Use original ID for update
-    };
+      // Prepare data for server action (similar to before)
+      const dataToSend = {
+        title: eventData.title,
+        startDate: new Date(eventData.start), // Ensure Date objects
+        endDate: eventData.end ? new Date(eventData.end) : new Date(eventData.start), // Handle optional end
+        allDay: eventData.allDay,
+        color: eventData.color,
+        description: eventData.extendedProps?.description,
+        type: (eventData.extendedProps?.type?.toUpperCase() ?? 'OTHER') as EventType,
+        id: isUpdating ? Number(eventData.extendedProps?.originalId) : undefined, // Use original ID for update
+      };
 
-    // Adjust end date for all-day events if necessary for server logic
-    // (FullCalendar's end is exclusive, server might expect inclusive)
-    // This depends on your backend implementation. Example:
-    if (dataToSend.allDay && dataToSend.endDate) {
-       // If backend expects inclusive end date for allDay events, adjust:
-       // dataToSend.endDate.setDate(dataToSend.endDate.getDate() - 1);
-    }
+      // Adjust end date for all-day events if necessary for server logic
+      // (FullCalendar's end is exclusive, server might expect inclusive)
+      // This depends on your backend implementation. Example:
+      if (dataToSend.allDay && dataToSend.endDate) {
+        // If backend expects inclusive end date for allDay events, adjust:
+        // dataToSend.endDate.setDate(dataToSend.endDate.getDate() - 1);
+      }
 
-
-    type SavedEvent = { // Expected shape from server actions
+      type SavedEvent = {
+        // Expected shape from server actions
         id: number;
         title: string;
         start: Date | string;
@@ -175,141 +182,150 @@ const CalendarClientPage = () => {
         description: string | null;
         type: EventType;
         userId: string | null;
-    };
-
-    try {
-      let savedEvent: SavedEvent;
-      if (isUpdating && dataToSend.id) {
-        savedEvent = await updateCalendarEvent(dataToSend);
-      } else {
-        savedEvent = await addCalendarEvent(dataToSend);
-      }
-
-      // Convert saved event back to FullCalendar format
-      const calendarEvent: MyFullCalendarEvent = {
-        id: String(savedEvent.id),
-        title: savedEvent.title,
-        start: new Date(savedEvent.start),
-        end: new Date(savedEvent.end),
-        allDay: savedEvent.allDay ?? undefined,
-        color: savedEvent.color ?? undefined,
-        extendedProps: {
-          description: savedEvent.description ?? undefined,
-          type: savedEvent.type.toLowerCase() as MyFullCalendarEvent['extendedProps']['type'],
-          originalId: savedEvent.id,
-        },
       };
 
-      // Update local state
-      if (isUpdating) {
-        setEvents((prev) => prev.map((ev) => (ev.id === calendarEvent.id ? calendarEvent : ev)));
-      } else {
-        setEvents((prev) => [...prev, calendarEvent]);
-      }
-
-      console.log(isUpdating ? "Updated event:" : "Added new event:", savedEvent);
-
-      // Re-fetch vacation days if necessary
-      if (savedEvent.type === EventType.VACATION) {
-        try {
-          const updatedDays = await getUserVacationDays();
-          setVacationDays(updatedDays);
-        } catch (fetchErr) {
-          console.error("Failed to re-fetch vacation days after save:", fetchErr);
+      try {
+        let savedEvent: SavedEvent;
+        if (isUpdating && dataToSend.id) {
+          savedEvent = await updateCalendarEvent(dataToSend);
+        } else {
+          savedEvent = await addCalendarEvent(dataToSend);
         }
-      }
 
-      handleCloseModal();
-    } catch (err: any) {
-      console.error("Failed to save event:", err);
-      setError(err.message || "Could not save the event.");
-    }
-  }, [handleCloseModal]);
+        // Convert saved event back to FullCalendar format
+        const calendarEvent: MyFullCalendarEvent = {
+          id: String(savedEvent.id),
+          title: savedEvent.title,
+          start: new Date(savedEvent.start),
+          end: new Date(savedEvent.end),
+          allDay: savedEvent.allDay ?? undefined,
+          color: savedEvent.color ?? undefined,
+          extendedProps: {
+            description: savedEvent.description ?? undefined,
+            type: savedEvent.type.toLowerCase() as MyFullCalendarEvent['extendedProps']['type'],
+            originalId: savedEvent.id,
+          },
+        };
+
+        // Update local state
+        if (isUpdating) {
+          setEvents((prev) => prev.map((ev) => (ev.id === calendarEvent.id ? calendarEvent : ev)));
+        } else {
+          setEvents((prev) => [...prev, calendarEvent]);
+        }
+
+        console.log(isUpdating ? 'Updated event:' : 'Added new event:', savedEvent);
+
+        // Re-fetch vacation days if necessary
+        if (savedEvent.type === EventType.VACATION) {
+          try {
+            const updatedDays = await getUserVacationDays();
+            setVacationDays(updatedDays);
+          } catch (fetchErr) {
+            console.error('Failed to re-fetch vacation days after save:', fetchErr);
+          }
+        }
+
+        handleCloseModal();
+      } catch (err: any) {
+        console.error('Failed to save event:', err);
+        setError(err.message || 'Could not save the event.');
+      }
+    },
+    [handleCloseModal]
+  );
 
   // --- Handler for deleting an event ---
-  const handleDeleteEvent = useCallback(async (eventId: number | string) => {
-    // Confirmation is now handled within the function
-    if (!window.confirm("Are you sure you want to delete this event?")) {
+  const handleDeleteEvent = useCallback(
+    async (eventId: number | string) => {
+      // Confirmation is now handled within the function
+      if (!window.confirm('Are you sure you want to delete this event?')) {
         return;
-    }
-    setError(null);
-    try {
+      }
+      setError(null);
+      try {
         // Find the event in the current state to check its type before deleting
-        const eventToDelete = events.find(ev => ev.id === String(eventId) || ev.extendedProps.originalId === eventId);
+        const eventToDelete = events.find(
+          (ev) => ev.id === String(eventId) || ev.extendedProps.originalId === eventId
+        );
         const originalIdToDelete = eventToDelete?.extendedProps.originalId;
 
         // Ensure originalIdToDelete is a number before calling deleteCalendarEvent
         const idNum = Number(originalIdToDelete);
         if (isNaN(idNum)) {
-             throw new Error("Invalid Event ID for deletion.");
+          throw new Error('Invalid Event ID for deletion.');
         }
-
 
         await deleteCalendarEvent(idNum); // Pass the numeric ID
 
         // Remove from local state using FullCalendar's string ID
         setEvents((prev) => prev.filter((ev) => ev.id !== String(eventId)));
 
-        console.log("Deleted event with original ID:", originalIdToDelete);
+        console.log('Deleted event with original ID:', originalIdToDelete);
 
         // Re-fetch vacation days if necessary
         if (eventToDelete?.extendedProps?.type === 'vacation') {
-             try {
-                const updatedDays = await getUserVacationDays();
-                setVacationDays(updatedDays);
-            } catch (fetchErr) {
-                console.error("Failed to re-fetch vacation days after delete:", fetchErr);
-            }
+          try {
+            const updatedDays = await getUserVacationDays();
+            setVacationDays(updatedDays);
+          } catch (fetchErr) {
+            console.error('Failed to re-fetch vacation days after delete:', fetchErr);
+          }
         }
 
         handleCloseModal(); // Close modal if deletion was triggered from there
-    } catch (err: any) {
-        console.error("Failed to delete event:", err);
-        setError(err.message || "Could not delete the event.");
-    }
-  }, [events, handleCloseModal]); // Added events dependency
+      } catch (err: any) {
+        console.error('Failed to delete event:', err);
+        setError(err.message || 'Could not delete the event.');
+      }
+    },
+    [events, handleCloseModal]
+  ); // Added events dependency
 
   // --- Handler for initiating edit from UpcomingEvents ---
   // Assumes UpcomingEvents passes the FullCalendar event ID (string)
-  const handleEditFromUpcoming = useCallback((eventId: string) => {
-    const eventToEdit = events.find(ev => ev.id === eventId);
-    if (eventToEdit) {
-      // Simulate an event click to open the modal
-      handleEventClick({
-        event: {
-          id: eventToEdit.id,
-          title: eventToEdit.title,
-          start: eventToEdit.start ? new Date(eventToEdit.start) : null, // Need Date objects for click arg
-          end: eventToEdit.end ? new Date(eventToEdit.end) : null,
-          startStr: eventToEdit.start?.toString() ?? '', // Provide string versions
-          endStr: eventToEdit.end?.toString() ?? '',
-          allDay: eventToEdit.allDay ?? false,
-          extendedProps: eventToEdit.extendedProps,
-          // Mock other EventApi properties needed by handleEventClick if any
-          // These might not be strictly necessary if handleEventClick only uses the above
-          // Example mocks (adjust as needed):
-          jsEvent: {} as MouseEvent,
-          view: calendarRef.current?.getApi().view ?? {} as any,
-          el: {} as HTMLElement,
-          source: undefined,
-          backgroundColor: eventToEdit.color ?? '',
-          borderColor: eventToEdit.color ?? '',
-          textColor: '', // Add appropriate text color if needed
-          // Add other methods like setProp, remove, etc., as empty functions if required by handleEventClick
-          setProp: () => {},
-          setExtendedProp: () => {},
-          remove: () => {},
-          // ... other EventApi methods
-        } as any, // Use 'as any' carefully, ensure required props are present
-        jsEvent: new MouseEvent('click'), // Mock JS event
-        view: calendarRef.current?.getApi().view ?? {} as any, // Mock view object
-        el: document.createElement('div'), // Mock element
-      });
-    } else {
-      console.error("Could not find event with ID:", eventId, "to edit from upcoming list.");
-      setError("Could not find the selected event to edit.");
-    }
-  }, [events, handleEventClick]); // Add dependencies
+  const handleEditFromUpcoming = useCallback(
+    (eventId: string) => {
+      const eventToEdit = events.find((ev) => ev.id === eventId);
+      if (eventToEdit) {
+        // Simulate an event click to open the modal
+        handleEventClick({
+          event: {
+            id: eventToEdit.id,
+            title: eventToEdit.title,
+            start: eventToEdit.start ? new Date(eventToEdit.start) : null, // Need Date objects for click arg
+            end: eventToEdit.end ? new Date(eventToEdit.end) : null,
+            startStr: eventToEdit.start?.toString() ?? '', // Provide string versions
+            endStr: eventToEdit.end?.toString() ?? '',
+            allDay: eventToEdit.allDay ?? false,
+            extendedProps: eventToEdit.extendedProps,
+            // Mock other EventApi properties needed by handleEventClick if any
+            // These might not be strictly necessary if handleEventClick only uses the above
+            // Example mocks (adjust as needed):
+            jsEvent: {} as MouseEvent,
+            view: calendarRef.current?.getApi().view ?? ({} as any),
+            el: {} as HTMLElement,
+            source: undefined,
+            backgroundColor: eventToEdit.color ?? '',
+            borderColor: eventToEdit.color ?? '',
+            textColor: '', // Add appropriate text color if needed
+            // Add other methods like setProp, remove, etc., as empty functions if required by handleEventClick
+            setProp: () => {},
+            setExtendedProp: () => {},
+            remove: () => {},
+            // ... other EventApi methods
+          } as any, // Use 'as any' carefully, ensure required props are present
+          jsEvent: new MouseEvent('click'), // Mock JS event
+          view: calendarRef.current?.getApi().view ?? ({} as any), // Mock view object
+          el: document.createElement('div'), // Mock element
+        });
+      } else {
+        console.error('Could not find event with ID:', eventId, 'to edit from upcoming list.');
+        setError('Could not find the selected event to edit.');
+      }
+    },
+    [events, handleEventClick]
+  ); // Add dependencies
 
   // --- Custom Event Rendering/Styling (Example) ---
   // FullCalendar offers various ways: eventContent, eventClassNames, etc.
@@ -325,7 +341,11 @@ const CalendarClientPage = () => {
     return (
       <>
         <b>{eventInfo.timeText}</b> {/* Display time if applicable */}
-        <i>{icon}{eventInfo.event.title}</i> {/* Display title */}
+        <i>
+          {icon}
+          {eventInfo.event.title}
+        </i>{' '}
+        {/* Display title */}
       </>
     );
   };
@@ -353,29 +373,34 @@ const CalendarClientPage = () => {
 
   // Render Loading / Error / Calendar
   if (isLoading) {
-    return <div className="p-4 text-center">Loading Calendar...</div>;
+    return <div className='p-4 text-center'>Loading Calendar...</div>;
   }
 
   return (
     <>
       {/* Error Display */}
       {error && (
-        <div className="mb-4 p-3 border border-red-400 bg-red-100 text-red-700 rounded">
+        <div className='mb-4 p-3 border border-red-400 bg-red-100 text-red-700 rounded'>
           <strong>Error:</strong> {error}
         </div>
       )}
 
       {/* Top section for stats */}
-      <div className="mb-4 p-4 border rounded bg-gray-100 dark:bg-gray-900 shadow-sm">
-        <h3 className="text-lg font-semibold">Vacation Allowance</h3>
-        <p>Remaining Days: <span className="font-bold text-blue-600 dark:text-blue-400">{vacationDays}</span></p>
+      <div className='mb-4 p-4 border rounded bg-gray-100 dark:bg-gray-900 shadow-sm'>
+        <h3 className='text-lg font-semibold'>Vacation Allowance</h3>
+        <p>
+          Remaining Days:{' '}
+          <span className='font-bold text-blue-600 dark:text-blue-400'>{vacationDays}</span>
+        </p>
       </div>
 
       {/* Main Calendar and Timeline Layout */}
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className='flex flex-col lg:flex-row gap-4'>
         {/* Calendar Section */}
         {/* Add a container div for better height control if needed */}
-        <div className="flex-grow lg:w-2/3 h-[70vh] calendar-container"> {/* Added class */}
+        <div className='flex-grow lg:w-2/3 h-[70vh] calendar-container'>
+          {' '}
+          {/* Added class */}
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
@@ -383,9 +408,9 @@ const CalendarClientPage = () => {
               left: 'prev,next today',
               center: 'title',
               // Add multiMonthYear for the year view
-              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek,multiMonthYear'
+              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek,multiMonthYear',
             }}
-            initialView="dayGridMonth"
+            initialView='dayGridMonth'
             events={events}
             selectable={true}
             selectMirror={true} // Show placeholder event while selecting
@@ -396,15 +421,15 @@ const CalendarClientPage = () => {
             // eventContent={renderEventContent} // Optional: Custom event rendering
             // dayCellClassNames={getDayCellClassNames} // Optional: Custom day cell styling
             firstDay={1} // Start week on Monday
-            height="100%" // Make calendar fill container height
+            height='100%' // Make calendar fill container height
             // Add other FullCalendar options as needed
           />
         </div>
 
         {/* Upcoming Events Timeline Section */}
-        <div className="lg:w-1/3">
-          <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
-          <div className="border rounded p-4 bg-white dark:bg-gray-800 shadow h-[calc(70vh-48px)] overflow-y-auto">
+        <div className='lg:w-1/3'>
+          <h2 className='text-xl font-semibold mb-4'>Upcoming Events</h2>
+          <div className='border rounded p-4 bg-white dark:bg-gray-800 shadow h-[calc(70vh-48px)] overflow-y-auto'>
             {/* UpcomingEvents needs adaptation if it relies heavily on the old event structure */}
             <UpcomingEvents
               events={events} // Pass FullCalendar formatted events
@@ -426,13 +451,18 @@ const CalendarClientPage = () => {
         // Adapt props based on EventModal's new requirements:
         // Pass either selected date info or the event being edited
         // Ensure start and end dates exist in modalData before passing
-        slotInfo={modalData && !modalData.event && modalData.start && modalData.end ? { start: modalData.start, end: modalData.end, allDay: modalData.allDay } : undefined}
+        slotInfo={
+          modalData && !modalData.event && modalData.start && modalData.end
+            ? { start: modalData.start, end: modalData.end, allDay: modalData.allDay }
+            : undefined
+        }
         eventToEdit={modalData?.event} // Pass the FullCalendar event object
       />
 
       {/* Add some basic styling for the container if needed */}
       <style jsx global>{`
-        .calendar-container .fc { /* Target FullCalendar elements */
+        .calendar-container .fc {
+          /* Target FullCalendar elements */
           height: 100%; /* Ensure FC takes full height */
         }
         /* Add any other custom styles needed for FullCalendar integration */

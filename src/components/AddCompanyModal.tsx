@@ -59,7 +59,9 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({ isOpen, onClose }) =>
       <form ref={formRef} action={dispatch}>
         {/* Display general form message/errors */}
         {state.message && !state.errors?.id && !state.errors?.name && !state.errors?.database && (
-          <p className={`mb-4 text-sm ${state.message.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>
+          <p
+            className={`mb-4 text-sm ${state.message.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}
+          >
             {state.message}
           </p>
         )}
@@ -69,7 +71,10 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({ isOpen, onClose }) =>
 
         {/* Company ID */}
         <div className='mb-4'>
-          <label htmlFor='companyId' className='block text-sm font-medium text-lightTextColor dark:text-darkTextColor mb-1'>
+          <label
+            htmlFor='companyId'
+            className='block text-sm font-medium text-lightTextColor dark:text-darkTextColor mb-1'
+          >
             Company ID
           </label>
           <input
@@ -89,7 +94,10 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({ isOpen, onClose }) =>
 
         {/* Company Name */}
         <div className='mb-4'>
-          <label htmlFor='companyName' className='block text-sm font-medium text-lightTextColor dark:text-darkTextColor mb-1'>
+          <label
+            htmlFor='companyName'
+            className='block text-sm font-medium text-lightTextColor dark:text-darkTextColor mb-1'
+          >
             Company Name
           </label>
           <input

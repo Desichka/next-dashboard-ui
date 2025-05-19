@@ -11,10 +11,13 @@ const AddDesignSchema = z.object({
     .number({ invalid_type_error: 'Company Number must be a number.' })
     .int({ message: 'Company Number must be an integer.' }) // Ensure integer
     .positive({ message: 'Company Number must be positive.' }),
-  companyName: z.string().min(1, { message: 'Company Name is required when company number is new.' }), // Added back, validation logic handled below
+  companyName: z
+    .string()
+    .min(1, { message: 'Company Name is required when company number is new.' }), // Added back, validation logic handled below
   templateName: z.string().min(1, { message: 'Template Name is required.' }),
   userId: z.string().cuid({ message: 'Invalid User ID format.' }), // Changed from employeeId (number) to userId (string/cuid)
-  status: z.nativeEnum(Status, { // Add status validation
+  status: z.nativeEnum(Status, {
+    // Add status validation
     errorMap: () => ({ message: 'Invalid status selected.' }),
   }),
   partners: z.string().optional(), // Add optional partners
@@ -56,7 +59,8 @@ export async function addDesign(
   }
 
   // Destructure validated fields
-  const { companyNumber, companyName, templateName, userId, status, partners } = validatedFields.data;
+  const { companyNumber, companyName, templateName, userId, status, partners } =
+    validatedFields.data;
 
   try {
     // 1. Find or Create Company
@@ -67,11 +71,12 @@ export async function addDesign(
 
     // If company not found, create it (requires companyName)
     if (!company) {
-      if (!companyName) { // Double-check name is provided if creating
-         return {
-           message: 'Company Name is required when adding a new company number.',
-           errors: { companyName: ['Company Name cannot be empty for a new company.'] },
-         };
+      if (!companyName) {
+        // Double-check name is provided if creating
+        return {
+          message: 'Company Name is required when adding a new company number.',
+          errors: { companyName: ['Company Name cannot be empty for a new company.'] },
+        };
       }
       try {
         company = await prisma.company.create({
@@ -81,14 +86,20 @@ export async function addDesign(
           },
         });
       } catch (e: any) {
-         // Handle potential unique constraint violation if ID already exists but wasn't found initially (race condition?)
-         if (e.code === 'P2002' && e.meta?.target?.includes('id')) {
-             return { message: 'Database Error: Company number might already exist.', errors: { companyNumber: ['This company number is already taken.'] } };
-         }
-         if (e.code === 'P2002' && e.meta?.target?.includes('name')) {
-             return { message: 'Database Error: Company name might already exist.', errors: { companyName: ['This company name is already taken.'] } };
-         }
-         throw e; // Re-throw other errors
+        // Handle potential unique constraint violation if ID already exists but wasn't found initially (race condition?)
+        if (e.code === 'P2002' && e.meta?.target?.includes('id')) {
+          return {
+            message: 'Database Error: Company number might already exist.',
+            errors: { companyNumber: ['This company number is already taken.'] },
+          };
+        }
+        if (e.code === 'P2002' && e.meta?.target?.includes('name')) {
+          return {
+            message: 'Database Error: Company name might already exist.',
+            errors: { companyName: ['This company name is already taken.'] },
+          };
+        }
+        throw e; // Re-throw other errors
       }
     }
 
@@ -120,7 +131,6 @@ export async function addDesign(
     revalidatePath('/list/designs');
 
     return { message: 'Design added successfully!' };
-
   } catch (error) {
     console.error('Database Error:', error);
     return {

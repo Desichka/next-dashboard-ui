@@ -41,7 +41,6 @@ export default async function CompanysPage({ searchParams }: CompanysPageProps) 
   // const totalPages = 1;
   // const totalItems = 0; // Added placeholder totalItems
 
-
   return (
     <CompanysClientPage
       initialCompanys={companys}

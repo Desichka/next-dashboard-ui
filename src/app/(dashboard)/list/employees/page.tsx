@@ -13,8 +13,8 @@ const EmployeePage = async () => {
     // Or show an unauthorized message
     // redirect('/sign-in'); // Or redirect to an unauthorized page
     return (
-      <div className="p-4">
-        <h1 className="text-xl font-bold text-red-600">Access Denied</h1>
+      <div className='p-4'>
+        <h1 className='text-xl font-bold text-red-600'>Access Denied</h1>
         <p>You do not have permission to view this page.</p>
       </div>
     );

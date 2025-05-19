@@ -22,11 +22,12 @@ export async function changePassword(formData: ChangePasswordData) {
   if (!formData.currentPassword || !formData.newPassword) {
     return { success: false, error: 'Current and new passwords are required.' };
   }
-  if (formData.newPassword.length < 6) { // Example: Enforce minimum length
-      return { success: false, error: 'New password must be at least 6 characters long.' };
+  if (formData.newPassword.length < 6) {
+    // Example: Enforce minimum length
+    return { success: false, error: 'New password must be at least 6 characters long.' };
   }
   if (formData.currentPassword === formData.newPassword) {
-      return { success: false, error: 'New password cannot be the same as the current password.' };
+    return { success: false, error: 'New password cannot be the same as the current password.' };
   }
 
   try {
@@ -42,10 +43,7 @@ export async function changePassword(formData: ChangePasswordData) {
     }
 
     // 4. Verify Current Password
-    const isCurrentPasswordValid = await bcrypt.compare(
-      formData.currentPassword,
-      user.password
-    );
+    const isCurrentPasswordValid = await bcrypt.compare(formData.currentPassword, user.password);
 
     if (!isCurrentPasswordValid) {
       return { success: false, error: 'Incorrect current password.' };
@@ -65,7 +63,6 @@ export async function changePassword(formData: ChangePasswordData) {
     // as the password change doesn't affect displayed data directly.
     // The user will use the new password next time they log in.
     return { success: true, message: 'Password updated successfully.' };
-
   } catch (error) {
     console.error(`[changePassword] Error changing password for user ${userId}:`, error);
     return { success: false, error: 'Failed to change password. Please try again.' };

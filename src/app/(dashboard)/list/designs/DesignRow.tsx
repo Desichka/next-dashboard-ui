@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react'; // Import useEffect
-// Link is no longer used directly for delete, can be removed if not used elsewhere in the file later
-// import Link from 'next/link';
+import Link from 'next/link'; // Import Link
 import StatusChanger from '@/components/StatusChanger';
 import CustomIcon from '@/components/CustomIcon';
 import { format } from 'date-fns';
@@ -52,45 +51,52 @@ const DesignRow = ({ item }: { item: Design }) => {
   };
 
   return (
-    <> {/* Wrap the entire return in a Fragment */}
+    <>
+      {' '}
+      {/* Wrap the entire return in a Fragment */}
       <tr
         key={item.id}
         className='border-lightEmphasisColor dark:border-darkEmphasisColor border-b text-sm hover:bg-lightEmphasisColor dark:hover:bg-darkEmphasisColor'
-    >
-      <td className='h-12 px-4'>{item.companyId}</td>
-      <td className='hidden md:table-cell px-4'>{item.company.name}</td>
-      <td className='px-4'>
-      <StatusChanger
-          itemId={item.id.toString()} // Convert number to string
-          currentStatusValue={item.status} // Pass the current status from DB
-        />
-      </td>
-    <td className='px-4'>
-      <div className='flex flex-col'>
-        <span className='font-semibold leading-3'>{item.user?.username ?? 'N/A'}</span> {/* Changed from item.employee */}
-        <span className='text-xs font-thin'>{item.partners}</span>
-      </div>
-    </td>
-      {/* Render formatted dates from state */}
-      <td className='hidden md:table-cell px-4'>{clientFormattedCreatedAt || '...'}</td>
-      <td className='hidden md:table-cell px-4'>{clientFormattedUpdatedAt || '...'}</td>
-      <td className='px-4 pt-3 flex gap-4'>
-        <button onClick={() => setIsModalOpen(true)}> {/* Open modal on click */}
-          <CustomIcon name='delete' />
-        </button>
-        <button>
-          <CustomIcon name='details' />
-        </button>
-      </td>
-    </tr>
-    {/* Render the modal */}
-    <ConfirmationModal
-      isOpen={isModalOpen}
-      onClose={() => setIsModalOpen(false)}
-      onConfirm={handleDeleteConfirm}
-      title='Delete Design'
-      message={`Are you sure you want to delete design ID ${item.id}? This action cannot be undone.`}
-    />
+      >
+        <td className='h-12 px-4'>{item.companyId}</td>
+        <td className='hidden md:table-cell px-4'>{item.company.name}</td>
+        <td className='px-4'>
+          <StatusChanger
+            itemId={item.id.toString()} // Convert number to string
+            currentStatusValue={item.status} // Pass the current status from DB
+          />
+        </td>
+        <td className='px-4'>
+          <div className='flex flex-col'>
+            <span className='font-semibold leading-3'>{item.user?.username ?? 'N/A'}</span>{' '}
+            {/* Changed from item.employee */}
+            <span className='text-xs font-thin'>{item.partners}</span>
+          </div>
+        </td>
+        {/* Render formatted dates from state */}
+        <td className='hidden md:table-cell px-4'>{clientFormattedCreatedAt || '...'}</td>
+        <td className='hidden md:table-cell px-4'>{clientFormattedUpdatedAt || '...'}</td>
+        <td className='px-4 pt-3 flex gap-4'>
+          <button onClick={() => setIsModalOpen(true)}>
+            {' '}
+            {/* Open modal on click */}
+            <CustomIcon name='delete' />
+          </button>
+          <Link href={`/list/designs/${item.id}`}>
+            <button>
+              <CustomIcon name='details' />
+            </button>
+          </Link>
+        </td>
+      </tr>
+      {/* Render the modal */}
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title='Delete Design'
+        message={`Are you sure you want to delete design ID ${item.id}? This action cannot be undone.`}
+      />
     </> // Close the Fragment
   );
 };

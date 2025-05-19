@@ -9,7 +9,7 @@ export default async function HomePage() {
 
   if (!session || !session.user) {
     // Not logged in, redirect to sign-in page
-    console.log("No session found, redirecting to /sign-in");
+    console.log('No session found, redirecting to /sign-in');
     redirect('/sign-in');
   } else {
     // Logged in, check role and redirect

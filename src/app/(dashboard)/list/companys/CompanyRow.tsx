@@ -27,7 +27,7 @@ const CompanyRow = ({ item }: { item: Company }) => {
     // Call the server action
     const result = await deleteCompany(item.id);
     if (!result.success) {
-      console.error("Deletion failed:", result.error);
+      console.error('Deletion failed:', result.error);
       // Optionally show an error message to the user (e.g., using a toast notification library)
       alert(`Error deleting company: ${result.error}`); // Simple alert for now
     }
@@ -41,7 +41,9 @@ const CompanyRow = ({ item }: { item: Company }) => {
   };
 
   return (
-    <> {/* Wrap the entire return in a Fragment */}
+    <>
+      {' '}
+      {/* Wrap the entire return in a Fragment */}
       <tr
         key={item.id}
         className='border-lightEmphasisColor dark:border-darkEmphasisColor border-b text-sm hover:bg-lightEmphasisColor dark:hover:bg-darkEmphasisColor'
@@ -49,12 +51,17 @@ const CompanyRow = ({ item }: { item: Company }) => {
         <td className='h-12 px-4'>{item.id}</td> {/* Added ID cell */}
         <td className='h-12 px-4'>{item.name}</td>
         <td className='hidden md:table-cell px-4'>{formattedCreatedAtDate}</td>
-        <td className='hidden md:table-cell px-4'>{formattedUpdatedAtDate}</td> {/* Added Updated At cell */}
+        <td className='hidden md:table-cell px-4'>{formattedUpdatedAtDate}</td>{' '}
+        {/* Added Updated At cell */}
         <td className='px-4 pt-3 flex gap-4'>
-          <button onClick={() => setIsDeleteModalOpen(true)}> {/* Open delete modal */}
+          <button onClick={() => setIsDeleteModalOpen(true)}>
+            {' '}
+            {/* Open delete modal */}
             <CustomIcon name='delete' />
           </button>
-          <button onClick={handleEdit}> {/* Placeholder edit/details button */}
+          <button onClick={handleEdit}>
+            {' '}
+            {/* Placeholder edit/details button */}
             <CustomIcon name='details' /> {/* Changed from 'edit' to 'details' */}
           </button>
           {/* Add view/details button if needed */}

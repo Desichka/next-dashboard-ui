@@ -47,7 +47,6 @@ export default function StatusChanger({ itemId, currentStatusValue }: StatusChan
     setSelectedStatus(newStatusDef); // Optimistic UI update
     setError(null); // Clear previous errors
 
-
     // --- Choose ONE way to call the backend ---
 
     // Option A: Call API Route
@@ -83,19 +82,19 @@ export default function StatusChanger({ itemId, currentStatusValue }: StatusChan
 
     // Option B: Call Server Action
     startTransition(async () => {
-        const result = await updateItemStatus({ itemId, newStatus: newStatusValue });
-        if (!result.success) {
-            console.error(result.message);
-            setError(result.message);
-            toast.error(result.message);
-            // Revert optimistic update on failure
-            setSelectedStatus(initialStatusDef);
-        } else {
-            // Success! Server action should handle revalidation.
-             toast.success('Status updated!');
-             // The UI should update automatically if revalidatePath/Tag works correctly
-             // If not, you might need to manually trigger a refresh depending on your data fetching setup
-        }
+      const result = await updateItemStatus({ itemId, newStatus: newStatusValue });
+      if (!result.success) {
+        console.error(result.message);
+        setError(result.message);
+        toast.error(result.message);
+        // Revert optimistic update on failure
+        setSelectedStatus(initialStatusDef);
+      } else {
+        // Success! Server action should handle revalidation.
+        toast.success('Status updated!');
+        // The UI should update automatically if revalidatePath/Tag works correctly
+        // If not, you might need to manually trigger a refresh depending on your data fetching setup
+      }
     });
     // --- End choice ---
   };
@@ -129,18 +128,18 @@ export default function StatusChanger({ itemId, currentStatusValue }: StatusChan
   }, [isDropdownOpen]); // Re-run when dropdown opens/closes
 
   return (
-    <div className="relative inline-block text-left" ref={dropdownRef}>
+    <div className='relative inline-block text-left' ref={dropdownRef}>
       {/* Button to toggle dropdown */}
       <button
         ref={buttonRef} // Add ref to the button
-        type="button"
+        type='button'
         onClick={() => !effectiveIsLoading && setIsDropdownOpen(!isDropdownOpen)} // Prevent opening when loading
         disabled={effectiveIsLoading}
         className={`inline-flex items-center justify-center w-full px-2.5 py-0.5 rounded-full text-xs font-medium border focus:outline-none ${selectedStatus.colorClasses} ${effectiveIsLoading ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-85'}`}
-        aria-haspopup="true"
+        aria-haspopup='true'
         aria-expanded={isDropdownOpen}
       >
-        <IconComponent className="w-[15px] h-[15px] mr-1.5" aria-hidden="true" />
+        <IconComponent className='w-[15px] h-[15px] mr-1.5' aria-hidden='true' />
         {selectedStatus.label}
       </button>
 
@@ -151,11 +150,11 @@ export default function StatusChanger({ itemId, currentStatusValue }: StatusChan
           className={`absolute left-0 p-2 w-auto bg-lightBgColor dark:bg-darkBgColor rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10 ${
             openAbove ? 'bottom-full mb-1 origin-bottom-left' : 'mt-1 origin-top-left' // Conditional positioning
           }`}
-          role="menu"
-          aria-orientation="vertical"
-          aria-labelledby="menu-button" // Link to the button if it had an ID
+          role='menu'
+          aria-orientation='vertical'
+          aria-labelledby='menu-button' // Link to the button if it had an ID
         >
-          <div className="py-1" role="none">
+          <div className='py-1' role='none'>
             {STATUSES.map((statusOpt) => {
               const OptionIcon = statusOpt.icon;
               return (
@@ -172,9 +171,9 @@ export default function StatusChanger({ itemId, currentStatusValue }: StatusChan
                   } ${
                     selectedStatus.value === statusOpt.value ? '' : '' // Highlight selected
                   }`}
-                  role="menuitem"
+                  role='menuitem'
                 >
-                  <OptionIcon className="w-[15px] h-[15px] mr-1.5" aria-hidden="true" />
+                  <OptionIcon className='w-[15px] h-[15px] mr-1.5' aria-hidden='true' />
                   {statusOpt.label}
                 </button>
               );
@@ -184,13 +183,16 @@ export default function StatusChanger({ itemId, currentStatusValue }: StatusChan
       )}
 
       {/* Optional: Loading indicator - Position adjusted slightly if needed */}
-      <div className="flex items-center ml-2"> {/* Wrapper for indicators */}
-        {effectiveIsLoading && (
-            <span className="text-xs text-gray-500">Saving...</span>
-        )}
-        {error && !effectiveIsLoading && ( // Show error only if not loading
-            <span className="text-xs text-red-600" title={error}>Error!</span>
-        )}
+      <div className='flex items-center ml-2'>
+        {' '}
+        {/* Wrapper for indicators */}
+        {effectiveIsLoading && <span className='text-xs text-gray-500'>Saving...</span>}
+        {error &&
+          !effectiveIsLoading && ( // Show error only if not loading
+            <span className='text-xs text-red-600' title={error}>
+              Error!
+            </span>
+          )}
       </div>
     </div>
   );

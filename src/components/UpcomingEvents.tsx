@@ -22,9 +22,11 @@ interface UpcomingEventsProps {
 
 // Helper function to check if two dates are the same day (replaces date-fns)
 const isSameDay = (date1: Date, date2: Date): boolean => {
-  return date1.getFullYear() === date2.getFullYear() &&
-         date1.getMonth() === date2.getMonth() &&
-         date1.getDate() === date2.getDate();
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
 };
 
 // Helper function for formatting dates (replaces date-fns format)
@@ -37,20 +39,21 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, onEdit, onDelet
 
   // Filter for events starting from today onwards and sort them
   const upcoming = events
-    .map(event => ({ // Ensure start/end are Date objects for comparison
+    .map((event) => ({
+      // Ensure start/end are Date objects for comparison
       ...event,
       start: new Date(event.start),
-      end: event.end ? new Date(event.end) : new Date(event.start) // Handle optional end
+      end: event.end ? new Date(event.end) : new Date(event.start), // Handle optional end
     }))
-    .filter(event => event.start >= now || (event.end >= now && event.start < now)) // Include ongoing events
+    .filter((event) => event.start >= now || (event.end >= now && event.start < now)) // Include ongoing events
     .sort((a, b) => a.start.getTime() - b.start.getTime());
 
   return (
     <div>
       {upcoming.length === 0 ? (
-        <p className="text-gray-500 dark:text-gray-400">No upcoming events.</p>
+        <p className='text-gray-500 dark:text-gray-400'>No upcoming events.</p>
       ) : (
-        <ul className="space-y-3">
+        <ul className='space-y-3'>
           {upcoming.map((event) => {
             const startDate = event.start;
             // FullCalendar's end date for all-day events is exclusive, adjust if needed for display
@@ -61,46 +64,59 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, onEdit, onDelet
             const type = event.extendedProps.type;
 
             return (
-              <li key={event.id} className="p-3 border rounded bg-gray-50 dark:bg-gray-700 shadow-sm flex justify-between items-start">
-                <div> {/* Container for event details */}
-                  <p className="font-semibold text-gray-800 dark:text-gray-100">{event.title}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+              <li
+                key={event.id}
+                className='p-3 border rounded bg-gray-50 dark:bg-gray-700 shadow-sm flex justify-between items-start'
+              >
+                <div>
+                  {' '}
+                  {/* Container for event details */}
+                  <p className='font-semibold text-gray-800 dark:text-gray-100'>{event.title}</p>
+                  <p className='text-sm text-gray-600 dark:text-gray-300'>
                     {formatDate(startDate, { month: 'short', day: 'numeric', year: 'numeric' })}
-                    {event.allDay ? '' : ` ${formatDate(startDate, { hour: 'numeric', minute: 'numeric' })}`}
-                    { !isSameDay(startDate, endDate) && // Show end date only if different day
-                      ` - ${formatDate(endDate, { month: 'short', day: 'numeric', year: 'numeric' })}${event.allDay ? '' : ` ${formatDate(endDate, { hour: 'numeric', minute: 'numeric' })}`}`
-                    }
+                    {event.allDay
+                      ? ''
+                      : ` ${formatDate(startDate, { hour: 'numeric', minute: 'numeric' })}`}
+                    {!isSameDay(startDate, endDate) && // Show end date only if different day
+                      ` - ${formatDate(endDate, { month: 'short', day: 'numeric', year: 'numeric' })}${event.allDay ? '' : ` ${formatDate(endDate, { hour: 'numeric', minute: 'numeric' })}`}`}
                   </p>
                   {type && type !== 'other' && (
-                    <span className={`text-xs px-2 py-0.5 rounded capitalize ${
-                      type === 'vacation' ? 'bg-blue-200 text-blue-800' :
-                      type === 'meeting' ? 'bg-green-200 text-green-800' :
-                      type === 'holiday' ? 'bg-orange-200 text-orange-800' :
-                      'bg-gray-200 text-gray-800' // Fallback
-                    }`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded capitalize ${
+                        type === 'vacation'
+                          ? 'bg-blue-200 text-blue-800'
+                          : type === 'meeting'
+                            ? 'bg-green-200 text-green-800'
+                            : type === 'holiday'
+                              ? 'bg-orange-200 text-orange-800'
+                              : 'bg-gray-200 text-gray-800' // Fallback
+                      }`}
+                    >
                       {type}
                     </span>
                   )}
                 </div>
                 {(onEdit || onDelete) && (
-                  <div className="flex space-x-2 ml-2 flex-shrink-0"> {/* Container for buttons */}
+                  <div className='flex space-x-2 ml-2 flex-shrink-0'>
+                    {' '}
+                    {/* Container for buttons */}
                     {/* Prevent editing/deleting holidays */}
                     {type !== 'holiday' && onEdit && (
                       <button
                         onClick={() => onEdit(event.id)} // Pass string ID
-                        className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                        aria-label="Edit event"
+                        className='p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300'
+                        aria-label='Edit event'
                       >
-                        <PencilIcon className="h-4 w-4" />
+                        <PencilIcon className='h-4 w-4' />
                       </button>
                     )}
                     {type !== 'holiday' && onDelete && (
                       <button
                         onClick={() => onDelete(event.id)} // Pass string ID
-                        className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                        aria-label="Delete event"
+                        className='p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300'
+                        aria-label='Delete event'
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <TrashIcon className='h-4 w-4' />
                       </button>
                     )}
                   </div>

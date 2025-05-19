@@ -10,12 +10,12 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "jsmith" },
-        password: { label: "Password", type: "password" }
+        username: { label: 'Username', type: 'text', placeholder: 'jsmith' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials, req) {
         if (!credentials?.username || !credentials?.password) {
-          console.error("Missing username or password");
+          console.error('Missing username or password');
           return null;
         }
 
@@ -29,22 +29,22 @@ export const authOptions: NextAuthOptions = {
             password: true,
             image: true,
             role: true,
-          }
+          },
         });
 
         if (!user || !user.password) {
-          console.error("No user found with this username or user has no password set.");
+          console.error('No user found with this username or user has no password set.');
           return null;
         }
 
         const isValidPassword = await bcrypt.compare(credentials.password, user.password);
 
         if (!isValidPassword) {
-          console.error("Invalid password for username:", credentials.username);
+          console.error('Invalid password for username:', credentials.username);
           return null;
         }
 
-        console.log("Authorization successful for username:", user.username);
+        console.log('Authorization successful for username:', user.username);
         return {
           id: user.id,
           name: user.name,
@@ -52,8 +52,8 @@ export const authOptions: NextAuthOptions = {
           image: user.image,
           role: user.role,
         } as NextAuthUser;
-      }
-    })
+      },
+    }),
   ],
   session: {
     strategy: 'jwt',
@@ -71,24 +71,24 @@ export const authOptions: NextAuthOptions = {
       const userId = token.id || token.sub;
 
       if (userId) {
-          try {
-              const freshUser = await prisma.user.findUnique({
-                  where: { id: userId as string },
-                  select: { name: true, email: true, image: true, role: true }
-              });
+        try {
+          const freshUser = await prisma.user.findUnique({
+            where: { id: userId as string },
+            select: { name: true, email: true, image: true, role: true },
+          });
 
-              if (freshUser) {
-                  token.name = freshUser.name;
-                  token.email = freshUser.email;
-                  token.picture = freshUser.image;
-                  token.role = freshUser.role;
-                  if (!token.id) token.id = userId;
-              } else {
-                  console.warn(`User with ID ${userId} not found in DB during JWT refresh.`);
-              }
-          } catch (error) {
-              console.error("Error fetching fresh user data for JWT:", error);
+          if (freshUser) {
+            token.name = freshUser.name;
+            token.email = freshUser.email;
+            token.picture = freshUser.image;
+            token.role = freshUser.role;
+            if (!token.id) token.id = userId;
+          } else {
+            console.warn(`User with ID ${userId} not found in DB during JWT refresh.`);
           }
+        } catch (error) {
+          console.error('Error fetching fresh user data for JWT:', error);
+        }
       }
 
       return token;
@@ -102,7 +102,7 @@ export const authOptions: NextAuthOptions = {
         session.user.image = token.picture;
       }
       return session;
-    }
+    },
   },
   pages: {
     signIn: '/sign-in',

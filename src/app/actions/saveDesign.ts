@@ -37,7 +37,18 @@ export async function saveDesign(data: DesignInput) {
   const actionUserId = session.user.id; // User performing the save action
 
   // Destructure validated data
-  const { id, companyId, companyName, isNewCompany, templateName, partners, status, notes, userId: assignedUserId, checklistItems } = data;
+  const {
+    id,
+    companyId,
+    companyName,
+    isNewCompany,
+    templateName,
+    partners,
+    status,
+    notes,
+    userId: assignedUserId,
+    checklistItems,
+  } = data;
 
   let finalCompanyId: number;
 
@@ -104,7 +115,7 @@ export async function saveDesign(data: DesignInput) {
         // 3. Create new checklist items based on the submitted state
         if (checklistItems && checklistItems.length > 0) {
           await tx.designChecklistItem.createMany({
-            data: checklistItems.map(item => ({
+            data: checklistItems.map((item) => ({
               designId: id,
               checklistItemId: item.checklistItemId,
               customText: item.customText,
@@ -115,7 +126,6 @@ export async function saveDesign(data: DesignInput) {
         }
       });
       console.log(`Design ${id} updated successfully.`);
-
     } else {
       // --- Create New Design ---
       const newDesign = await prisma.design.create({
@@ -136,7 +146,7 @@ export async function saveDesign(data: DesignInput) {
       // Create associated checklist items
       if (checklistItems && checklistItems.length > 0) {
         await prisma.designChecklistItem.createMany({
-          data: checklistItems.map(item => ({
+          data: checklistItems.map((item) => ({
             designId: newDesign.id,
             checklistItemId: item.checklistItemId,
             customText: item.customText,
@@ -146,7 +156,6 @@ export async function saveDesign(data: DesignInput) {
         });
       }
     }
-
   } catch (error) {
     console.error('Database Error saving design:', error);
     // Consider returning a more specific error message
@@ -156,7 +165,7 @@ export async function saveDesign(data: DesignInput) {
   // Revalidate the designs list page cache
   revalidatePath('/list/designs');
   // Optionally revalidate the specific design page if one exists
-  // if (id) revalidatePath(`/designs/${id}`); 
+  // if (id) revalidatePath(`/designs/${id}`);
 
   // Redirect to the designs list page after successful save/update
   // Note: Redirects must be called outside the try/catch block

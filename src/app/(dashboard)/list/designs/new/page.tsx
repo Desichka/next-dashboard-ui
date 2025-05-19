@@ -1,5 +1,5 @@
 import React from 'react';
-import NewDesignClientPage from './NewDesignClientPage'; 
+import NewDesignClientPage from './NewDesignClientPage';
 import { fetchAllCompanies, fetchActiveChecklistItems, fetchAllUsers } from '@/lib/data'; // Import data fetching functions
 
 const NewDesignPage = async () => {
@@ -9,9 +9,9 @@ const NewDesignPage = async () => {
   const users = await fetchAllUsers(); // Fetch users
 
   return (
-    <NewDesignClientPage 
-      companies={companies} 
-      initialChecklistItems={initialChecklistItems} 
+    <NewDesignClientPage
+      companies={companies}
+      initialChecklistItems={initialChecklistItems}
       users={users} // Pass users as prop
     />
   );

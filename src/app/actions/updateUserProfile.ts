@@ -27,28 +27,27 @@ export async function updateUserProfile(formData: UserUpdateData) {
     return { success: false, error: 'No data provided for update.' };
   }
   if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-     return { success: false, error: 'Invalid email format.' };
+    return { success: false, error: 'Invalid email format.' };
   }
-   // Add validation for image URL if needed
+  // Add validation for image URL if needed
 
   // Prepare data for Prisma, converting empty strings to null for optional fields
   const dataToUpdate: { name?: string | null; email?: string | null; image?: string | null } = {};
   if (formData.name !== undefined) {
-      dataToUpdate.name = formData.name === '' ? null : formData.name;
+    dataToUpdate.name = formData.name === '' ? null : formData.name;
   }
   if (formData.email !== undefined) {
-      // Handle empty string for unique email field carefully. Setting to null if empty.
-      dataToUpdate.email = formData.email === '' ? null : formData.email;
+    // Handle empty string for unique email field carefully. Setting to null if empty.
+    dataToUpdate.email = formData.email === '' ? null : formData.email;
   }
   if (formData.image !== undefined) {
-      dataToUpdate.image = formData.image === '' ? null : formData.image;
+    dataToUpdate.image = formData.image === '' ? null : formData.image;
   }
 
   // Only proceed if there's actually something to update
   if (Object.keys(dataToUpdate).length === 0) {
-      return { success: false, error: 'No changes detected.' };
+    return { success: false, error: 'No changes detected.' };
   }
-
 
   try {
     console.log(`[updateUserProfile] Attempting to update user ${userId} with data:`, dataToUpdate);
@@ -63,15 +62,19 @@ export async function updateUserProfile(formData: UserUpdateData) {
 
     // console.log('User profile updated successfully:', updatedUser.id); // Redundant log
     return { success: true, user: updatedUser };
-
-  } catch (error: any) { // Catch specific error type if possible
+  } catch (error: any) {
+    // Catch specific error type if possible
     console.error(`[updateUserProfile] Error updating user ${userId}:`, error);
     // Handle specific Prisma errors
-    if (error?.code === 'P2002') { // Prisma unique constraint violation code
-         // Check which field caused the violation (likely email)
-         const target = (error.meta?.target as string[])?.join(', ');
-         console.error(`[updateUserProfile] Unique constraint violation on field(s): ${target}`);
-         return { success: false, error: `Unique constraint failed on ${target || 'field'}. The value might already be in use.` };
+    if (error?.code === 'P2002') {
+      // Prisma unique constraint violation code
+      // Check which field caused the violation (likely email)
+      const target = (error.meta?.target as string[])?.join(', ');
+      console.error(`[updateUserProfile] Unique constraint violation on field(s): ${target}`);
+      return {
+        success: false,
+        error: `Unique constraint failed on ${target || 'field'}. The value might already be in use.`,
+      };
     }
     return { success: false, error: 'Failed to update profile. Please try again.' };
   }

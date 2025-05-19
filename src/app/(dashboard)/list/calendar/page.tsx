@@ -5,9 +5,9 @@ import CalendarClientPage from '@/app/(dashboard)/list/calendar/CalendarClientPa
 // which handles the internal layout (calendar + timeline)
 const CalendarPage = () => {
   return (
-    <div className="p-4">
-       <h1 className="text-2xl font-semibold mb-4">Calendar & Events</h1>
-       <CalendarClientPage />
+    <div className='p-4'>
+      <h1 className='text-2xl font-semibold mb-4'>Calendar & Events</h1>
+      <CalendarClientPage />
     </div>
   );
 };

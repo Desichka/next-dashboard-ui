@@ -7,7 +7,7 @@
   :root {
     /* --- Light Theme --- */
     --background: 150 30% 90%;
-    --foreground: 150 10% 25%; 
+    --foreground: 150 10% 25%;
 
     --card: 153 20% 84%; /* #d6eae4 */
     --card-foreground: 153 10% 20%;
@@ -15,8 +15,8 @@
     --popover: 150 17% 80%; /* Slightly lighter than background */
     --popover-foreground: 150 15% 25%;
 
-    --primary: 150 36% 65%; 
-    --primary-foreground: 150 70% 5%; 
+    --primary: 150 36% 65%;
+    --primary-foreground: 150 70% 5%;
     --primary-hover: 150 30% 80%;
 
     --secondary: 166 94% 20%; /* #04614C */
@@ -27,7 +27,7 @@
 
     --accent: 154 96% 45%; /* Same as primary in this example */
     --accent-foreground: 154 100% 5%;
-    --accent-hover: 154 86% 35% / 0.8; 
+    --accent-hover: 154 86% 35% / 0.8;
 
     --destructive: 0 84% 60%; /* Bright Red */
     --destructive-foreground: 0 0% 100%; /* White */
@@ -69,7 +69,7 @@
     --popover-foreground: 150 15% 60%;
 
     --primary: 150 66% 15%;
-    --primary-foreground: 150 10% 63%; 
+    --primary-foreground: 150 10% 63%;
     --primary-hover: 150 40% 10%; /* Slightly lighter */
 
     --secondary: 166 94% 20%; /* #04614C */
@@ -115,54 +115,75 @@
     /* @apply font-sans; */
   }
   * {
-    @apply border-border; 
- }
+    @apply border-border;
+  }
 
- h1, h2, h3, h4, h5, h6 {
-   @apply font-semibold text-foreground; /* Use themed text color */
-   /* Add specific margin/size utilities if desired */
- }
- h1 { @apply text-xl lg:text-2xl mb-2; }
- h2 { @apply text-xl mb-3; }
- h3 { @apply text-xl mb-2; }
- /* etc. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold text-foreground; /* Use themed text color */
+    /* Add specific margin/size utilities if desired */
+  }
+  h1 {
+    @apply text-xl lg:text-2xl mb-2;
+  }
+  h2 {
+    @apply text-xl mb-3;
+  }
+  h3 {
+    @apply text-xl mb-2;
+  }
+  /* etc. */
 
- p {
-   @apply mb-4 leading-relaxed; /* Add bottom margin and adjust line height */
- }
- button {
-    @apply disabled:opacity-50 disabled:cursor-not-allowed;/* Add padding and border radius */
- }
+  p {
+    @apply mb-4 leading-relaxed; /* Add bottom margin and adjust line height */
+  }
+  button {
+    @apply disabled:opacity-50 disabled:cursor-not-allowed; /* Add padding and border radius */
+  }
 
+  ul,
+  ol {
+    @apply list-inside mb-4; /* Style lists */
+  }
+  ul {
+    @apply list-disc;
+  }
+  ol {
+    @apply list-decimal;
+  }
+  li {
+    @apply mb-1;
+  }
 
-
- ul, ol {
-   @apply list-inside mb-4; /* Style lists */
- }
- ul { @apply list-disc; }
- ol { @apply list-decimal; }
- li { @apply mb-1; }
-
-
- /* Basic input styling (can be expanded or moved to components) */
- textarea{
+  /* Basic input styling (can be expanded or moved to components) */
+  textarea {
     @apply border bg-input px-3 py-2 rounded-md placeholder:text-muted-foreground;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
     /* Apply border, bg, padding, radius, placeholder color, and focus ring */
- }
- select, input, [type="date"]{
+  }
+  select,
+  input,
+  [type='date'] {
     @apply mt-1 block w-full rounded-full bg-input border border-input text-sm text-foreground shadow-sm;
     @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1;
-    
- }
+  }
 
-
-
- img, svg, video, canvas, audio, iframe, embed, object {
-     @apply block align-middle; /* Common reset for media elements */
- }
- img, video {
-     @apply max-w-full h-auto; /* Prevent images/videos from overflowing containers */
- }
-
+  img,
+  svg,
+  video,
+  canvas,
+  audio,
+  iframe,
+  embed,
+  object {
+    @apply block align-middle; /* Common reset for media elements */
+  }
+  img,
+  video {
+    @apply max-w-full h-auto; /* Prevent images/videos from overflowing containers */
+  }
 }

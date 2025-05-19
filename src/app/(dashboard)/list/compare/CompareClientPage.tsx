@@ -17,7 +17,7 @@ const CompareClientPage = () => {
 
   return (
     <div className='p-4'>
-      <div className="flex justify-between items-center mb-4">
+      <div className='flex justify-between items-center mb-4'>
         <h1 className='text-2xl font-bold'>Compare Text</h1>
         <button
           onClick={handleClear}
@@ -45,7 +45,11 @@ const CompareClientPage = () => {
       <h2 className='text-xl font-semibold mb-2'>Differences</h2>
       <div className='p-2 border rounded bg-inputBgColor text-textColor border-borderColor whitespace-pre-wrap'>
         {differences.map((part, index) => {
-          const color = part.added ? 'bg-green-200 dark:bg-green-800' : part.removed ? 'bg-red-200 dark:bg-red-800' : 'bg-transparent';
+          const color = part.added
+            ? 'bg-green-200 dark:bg-green-800'
+            : part.removed
+              ? 'bg-red-200 dark:bg-red-800'
+              : 'bg-transparent';
           const textDecoration = part.removed ? 'line-through' : 'none';
           return (
             <span key={index} className={`${color}`} style={{ textDecoration }}>
@@ -54,11 +58,14 @@ const CompareClientPage = () => {
           );
         })}
         {firstDiff && typeof firstDiff.count === 'number' && firstDiff.count === 0 && (
-           <span className="text-gray-500">No differences found.</span>
+          <span className='text-gray-500'>No differences found.</span>
         )}
-         {firstDiff && typeof firstDiff.count === 'number' && firstDiff.count > 0 && !firstDiff.added && !firstDiff.removed && text1.length > 0 && (
-           <span className="text-gray-500">Texts are identical.</span>
-        )}
+        {firstDiff &&
+          typeof firstDiff.count === 'number' &&
+          firstDiff.count > 0 &&
+          !firstDiff.added &&
+          !firstDiff.removed &&
+          text1.length > 0 && <span className='text-gray-500'>Texts are identical.</span>}
       </div>
     </div>
   );

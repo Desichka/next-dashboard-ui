@@ -101,7 +101,6 @@ async function main() {
   });
   console.log('Deleted previous seed designs (if any).');
 
-
   // Use createMany for efficiency
   const createdDesigns = await prisma.design.createMany({
     data: designData,

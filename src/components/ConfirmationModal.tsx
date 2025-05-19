@@ -44,11 +44,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       } else if (typeof result === 'object' && result.error) {
         setErrorMessage(result.error); // Set error message on failure
       } else {
-         // Handle cases where onConfirm doesn't return the expected structure but doesn't throw
-         setErrorMessage('An unexpected issue occurred.');
+        // Handle cases where onConfirm doesn't return the expected structure but doesn't throw
+        setErrorMessage('An unexpected issue occurred.');
       }
     } catch (error) {
-      console.error("Confirmation action failed:", error);
+      console.error('Confirmation action failed:', error);
       setErrorMessage('An unexpected error occurred.');
     } finally {
       setIsLoading(false);
@@ -86,11 +86,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <p className='mb-4 text-lightTextSecondary dark:text-darkTextSecondary'>{message}</p>
 
         {/* Display Error Message */}
-          {errorMessage && (
-            <p className='mt-2 text-sm text-red-600 dark:text-red-400 text-center'>
-              {errorMessage}
-            </p>
-          )}
+        {errorMessage && (
+          <p className='mt-2 text-sm text-red-600 dark:text-red-400 text-center'>{errorMessage}</p>
+        )}
       </>
     </UniversalModal>
   );

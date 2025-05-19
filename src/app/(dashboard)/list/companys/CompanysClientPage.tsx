@@ -36,7 +36,6 @@ interface CompanysClientPageProps {
 //   </tr>
 // );
 
-
 export default function CompanysClientPage({
   initialCompanys,
   totalPages,
@@ -84,16 +83,14 @@ export default function CompanysClientPage({
     <div className=''>
       {/*top*/}
       <div className='flex items-center justify-between'>
-        <h1>
-          Companies
-        </h1>
+        <h1>Companies</h1>
         <div className='flex flex-col md:flex-row items-center gap-4 w-full md:w-auto justify-end'>
-           <TableSearch placeholder="Search companies..." />
+          <TableSearch placeholder='Search companies...' />
           <div className='flex items-center gap-4'>
-             {/* No filter component for companies yet */}
+            {/* No filter component for companies yet */}
             <button
               onClick={() => setIsModalOpen(true)}
-              className="bg-accent rounded-full shadow-md text-xl font-semibold px-4 py-2  text-accent-foreground hover:bg-accent-hover transition duration-200 ease-in-out"
+              className='bg-accent rounded-full shadow-md text-xl font-semibold px-4 py-2  text-accent-foreground hover:bg-accent-hover transition duration-200 ease-in-out'
             >
               +
             </button>

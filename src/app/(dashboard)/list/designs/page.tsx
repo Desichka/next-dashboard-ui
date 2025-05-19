@@ -77,7 +77,8 @@ const DesignsPage = async ({ searchParams }: { searchParams?: DesignsPageSearchP
   }
 
   // Combine all conditions with AND
-  const whereCondition: Prisma.DesignWhereInput = whereConditions.length > 0 ? { AND: whereConditions } : {};
+  const whereCondition: Prisma.DesignWhereInput =
+    whereConditions.length > 0 ? { AND: whereConditions } : {};
 
   // Fetch users for the filter dropdown (instead of employees)
   const users = await prisma.user.findMany({

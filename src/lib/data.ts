@@ -98,7 +98,8 @@ export async function getDesignById(id: number) {
       where: { id },
       include: {
         company: true, // Include company details
-        checklistItems: { // Include the associated checklist items
+        checklistItems: {
+          // Include the associated checklist items
           include: {
             checklistItem: true, // Include the original admin checklist item text if linked
             user: true, // Include user who last modified/checked the item
@@ -107,7 +108,7 @@ export async function getDesignById(id: number) {
             // Optional: Define an order, e.g., admin items first, then custom, then by creation
             checklistItemId: 'asc', // Puts items linked to ChecklistItem first (non-null IDs)
             // createdAt: 'asc', // Then order by creation time
-          }
+          },
         },
         // Include other relations if needed
       },
@@ -121,7 +122,8 @@ export async function getDesignById(id: number) {
 
 // Function to search designs by template name or company name
 export async function searchDesigns(term: string) {
-  if (!term || term.trim().length < 2) { // Basic validation
+  if (!term || term.trim().length < 2) {
+    // Basic validation
     return [];
   }
 
@@ -149,7 +151,8 @@ export async function searchDesigns(term: string) {
         ],
       },
       include: {
-        company: { // Include company name for display in search results
+        company: {
+          // Include company name for display in search results
           select: { name: true },
         },
       },
@@ -169,7 +172,8 @@ export async function searchDesigns(term: string) {
 export async function fetchAllUsers() {
   try {
     const users = await prisma.user.findMany({
-      select: { // Select only necessary fields for the dropdown
+      select: {
+        // Select only necessary fields for the dropdown
         id: true,
         name: true,
         username: true,
@@ -184,6 +188,5 @@ export async function fetchAllUsers() {
     throw new Error('Failed to fetch all users.');
   }
 }
-
 
 // Add other data fetching functions here as needed, e.g., fetchDesigns, fetchEmployees etc.

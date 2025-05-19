@@ -37,13 +37,12 @@ export const STATUSES: StatusDefinition[] = [
     colorClasses: 'text-green-700 bg-green-100 border-green-300',
   },
   {
-    value:'DONE',
+    value: 'DONE',
     label: 'Done',
     icon: (props) => <CustomIcon name={{ category: 'status', icon: 'done' }} {...props} />,
     colorClasses: 'text-green-700 bg-green-100 border-green-300',
-  }
-  
-  
+  },
+
   // Add more statuses as needed
 ];
 

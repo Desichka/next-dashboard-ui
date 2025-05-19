@@ -27,7 +27,8 @@ interface DesignsClientPageProps {
   itemsPerPage: number;
   // Pass searchParams relevant to client-side components if needed,
   // or handle search/filter state internally if preferred
-  searchParams: { // Pass relevant searchParams for client components like TableSearch/DesignFilter
+  searchParams: {
+    // Pass relevant searchParams for client components like TableSearch/DesignFilter
     query?: string;
     status?: string;
     userId?: string; // Changed from employeeId to userId
@@ -96,7 +97,7 @@ const DesignsClientPage: React.FC<DesignsClientPageProps> = ({
   // Increment key when closing to force modal reset on next open
   const closeModal = () => {
     setIsModalOpen(false);
-    setModalKey(prevKey => prevKey + 1);
+    setModalKey((prevKey) => prevKey + 1);
   };
 
   // Data fetching is removed. Use props passed from the parent Server Component.
@@ -108,18 +109,16 @@ const DesignsClientPage: React.FC<DesignsClientPageProps> = ({
     <div className=''>
       {/*top*/}
       <div className='flex items-center justify-between'>
-        <h1>
-          Designs
-        </h1>
+        <h1>Designs</h1>
         <div className='flex flex-col md:flex-row items-center gap-4 w-full md:w-auto justify-end'>
-           {/* TableSearch might need access to searchParams or handle state internally */}
-           <TableSearch placeholder="Search designs..." />
+          {/* TableSearch might need access to searchParams or handle state internally */}
+          <TableSearch placeholder='Search designs...' />
           <div className='flex items-center gap-4'>
-             {/* DesignFilter needs users and potentially searchParams */}
-             <DesignFilter users={users} /> 
+            {/* DesignFilter needs users and potentially searchParams */}
+            <DesignFilter users={users} />
             <button
               onClick={openModal}
-              className="bg-accent rounded-full shadow-md text-xl font-semibold px-4 py-2  text-accent-foreground hover:bg-accent-hover transition duration-200 ease-in-out"
+              className='bg-accent rounded-full shadow-md text-xl font-semibold px-4 py-2  text-accent-foreground hover:bg-accent-hover transition duration-200 ease-in-out'
             >
               +
             </button>

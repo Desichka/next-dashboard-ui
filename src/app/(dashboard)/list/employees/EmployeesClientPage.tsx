@@ -83,7 +83,11 @@ const EmployeesClientPage: React.FC<EmployeesClientPageProps> = ({ users }) => {
         return { success: true }; // Indicate success to the modal
       } else {
         // Extract error message from server action result
-        const errorMsg = result.errors?.database?.join(', ') || result.errors?.authorization?.join(', ') || result.message || 'Failed to delete user.';
+        const errorMsg =
+          result.errors?.database?.join(', ') ||
+          result.errors?.authorization?.join(', ') ||
+          result.message ||
+          'Failed to delete user.';
         console.error('Failed to delete user:', errorMsg);
         return { success: false, error: errorMsg }; // Return error to the modal
       }
@@ -98,34 +102,39 @@ const EmployeesClientPage: React.FC<EmployeesClientPageProps> = ({ users }) => {
 
   // Define columns for the Table component
   const columns = [
-    { header: 'Username', accessor: 'username',  },
-    { header: 'Name', accessor: 'name',  },
-    { header: 'Email', accessor: 'email',  },
-    { header: 'Role', accessor: 'role',  },
-    { header: 'Created At', accessor: 'createdAt',  },
-    { header: 'Actions', accessor: 'actions',  },
+    { header: 'Username', accessor: 'username' },
+    { header: 'Name', accessor: 'name' },
+    { header: 'Email', accessor: 'email' },
+    { header: 'Role', accessor: 'role' },
+    { header: 'Created At', accessor: 'createdAt' },
+    { header: 'Actions', accessor: 'actions' },
   ];
 
   // Define the renderRow function for the Table component
   const renderRow = (user: User) => (
-    <tr key={user.id} className='border-lightEmphasisColor dark:border-darkEmphasisColor border-b text-sm hover:bg-lightEmphasisColor dark:hover:bg-darkEmphasisColor'>
-      <td className="px-4 h-12">{user.username}</td>
-      <td className="px-4">{user.name || '-'}</td>
-      <td className="px-4 ">{user.email || '-'}</td>
-      <td className="px-4 ">{user.role}</td>
-      <td className="px-4 ">{new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</td>
-      <td className="px-4 gap-4 pt-3 flex">
+    <tr
+      key={user.id}
+      className='border-lightEmphasisColor dark:border-darkEmphasisColor border-b text-sm hover:bg-lightEmphasisColor dark:hover:bg-darkEmphasisColor'
+    >
+      <td className='px-4 h-12'>{user.username}</td>
+      <td className='px-4'>{user.name || '-'}</td>
+      <td className='px-4 '>{user.email || '-'}</td>
+      <td className='px-4 '>{user.role}</td>
+      <td className='px-4 '>
+        {new Date(user.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        })}
+      </td>
+      <td className='px-4 gap-4 pt-3 flex'>
         <button
           onClick={() => openDeleteModal(user.id)}
           aria-label={`Delete user ${user.username}`}
         >
           <CustomIcon name='delete' />
         </button>
-        <button
-          onClick={() => openEditModal(user)}
-          
-          aria-label={`Edit user ${user.username}`}
-        >
+        <button onClick={() => openEditModal(user)} aria-label={`Edit user ${user.username}`}>
           <CustomIcon name='details' />
         </button>
       </td>
@@ -136,16 +145,14 @@ const EmployeesClientPage: React.FC<EmployeesClientPageProps> = ({ users }) => {
     <div className=''>
       {/*top*/}
       <div className='flex items-center justify-between'>
-        <h1>
-          Employees
-        </h1>
+        <h1>Employees</h1>
         <div className='flex flex-col md:flex-row items-center gap-4 w-full md:w-auto justify-end'>
-           <TableSearch placeholder="Search employees..." />
+          <TableSearch placeholder='Search employees...' />
           <div className='flex items-center gap-4'>
-             {/* No filter component for employees yet */}
+            {/* No filter component for employees yet */}
             <button
               onClick={openAddModal}
-              className="bg-accent rounded-full shadow-md text-xl font-semibold px-4 py-2  text-accent-foreground hover:bg-accent-hover transition duration-200 ease-in-out"
+              className='bg-accent rounded-full shadow-md text-xl font-semibold px-4 py-2  text-accent-foreground hover:bg-accent-hover transition duration-200 ease-in-out'
             >
               +
             </button>
@@ -153,11 +160,7 @@ const EmployeesClientPage: React.FC<EmployeesClientPageProps> = ({ users }) => {
         </div>
       </div>
       {/*list*/}
-      <Table<User>
-        columns={columns}
-        data={users}
-        renderRow={renderRow}
-      />
+      <Table<User> columns={columns} data={users} renderRow={renderRow} />
 
       {/* Add/Edit Modal */}
       {(isAddModalOpen || isEditModalOpen) && (
@@ -175,8 +178,8 @@ const EmployeesClientPage: React.FC<EmployeesClientPageProps> = ({ users }) => {
           isOpen={isDeleteModalOpen}
           onClose={closeDeleteModal}
           onConfirm={handleDeleteConfirm}
-          title="Confirm Deletion"
-          message={`Are you sure you want to delete user ${users.find(u => u.id === selectedUserId)?.username ?? 'this user'}? This action cannot be undone.`}
+          title='Confirm Deletion'
+          message={`Are you sure you want to delete user ${users.find((u) => u.id === selectedUserId)?.username ?? 'this user'}? This action cannot be undone.`}
           // Removed isPending and errorMessage props
         />
       )}

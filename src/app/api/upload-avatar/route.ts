@@ -22,7 +22,10 @@ export async function POST(request: Request) {
 
     // Basic validation (add more as needed: size, type)
     if (!file.type.startsWith('image/')) {
-         return NextResponse.json({ success: false, error: 'Invalid file type. Please upload an image.' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Invalid file type. Please upload an image.' },
+        { status: 400 }
+      );
     }
 
     const bytes = await file.arrayBuffer();
@@ -36,13 +39,13 @@ export async function POST(request: Request) {
 
     // Ensure the upload directory exists
     try {
-        await mkdir(uploadDir, { recursive: true });
+      await mkdir(uploadDir, { recursive: true });
     } catch (mkdirError: any) {
-        // Ignore error if directory already exists, otherwise rethrow
-        if (mkdirError.code !== 'EEXIST') {
-            console.error('Failed to create upload directory:', mkdirError);
-            throw mkdirError; // Rethrow if it's not an 'already exists' error
-        }
+      // Ignore error if directory already exists, otherwise rethrow
+      if (mkdirError.code !== 'EEXIST') {
+        console.error('Failed to create upload directory:', mkdirError);
+        throw mkdirError; // Rethrow if it's not an 'already exists' error
+      }
     }
 
     // Write the file using Uint8Array
@@ -52,7 +55,6 @@ export async function POST(request: Request) {
     // Return the public URL of the uploaded file
     const publicUrl = `/uploads/avatars/${filename}`;
     return NextResponse.json({ success: true, url: publicUrl });
-
   } catch (error) {
     console.error('Error uploading avatar:', error);
     return NextResponse.json({ success: false, error: 'File upload failed.' }, { status: 500 });

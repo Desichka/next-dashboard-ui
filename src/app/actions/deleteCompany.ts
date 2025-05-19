@@ -9,7 +9,9 @@ const DeleteCompanySchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
-export async function deleteCompany(companyId: number): Promise<{ success: boolean; error?: string }> {
+export async function deleteCompany(
+  companyId: number
+): Promise<{ success: boolean; error?: string }> {
   // Validate the ID
   const validatedId = DeleteCompanySchema.safeParse({ id: companyId });
 
@@ -29,16 +31,20 @@ export async function deleteCompany(companyId: number): Promise<{ success: boole
     // Revalidate the path to update the UI
     revalidatePath('/list/companys'); // Adjust if your path is different
     return { success: true };
-
   } catch (error: any) {
     console.error('Database Error deleting company:', error);
 
     // Check for specific Prisma errors, like foreign key constraints
-    if (error.code === 'P2003') { // Foreign key constraint failed
-        return { success: false, error: 'Cannot delete company because it has associated designs or notes.' };
+    if (error.code === 'P2003') {
+      // Foreign key constraint failed
+      return {
+        success: false,
+        error: 'Cannot delete company because it has associated designs or notes.',
+      };
     }
-     if (error.code === 'P2025') { // Record to delete not found
-        return { success: false, error: 'Company not found.' };
+    if (error.code === 'P2025') {
+      // Record to delete not found
+      return { success: false, error: 'Company not found.' };
     }
 
     // General database error

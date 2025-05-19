@@ -39,7 +39,6 @@ async function main() {
     });
 
     console.log(`Password for user "${updatedUser.username}" has been updated successfully.`);
-
   } catch (error) {
     console.error('Error updating password:', error);
     process.exit(1);

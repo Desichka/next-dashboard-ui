@@ -70,7 +70,7 @@ const config: Config = {
       // --- Font Families ---
       fontFamily: {
         sans: ['var(--font-sans)', ...fontFamily.sans], // Use CSS var for primary sans font
-        mono: ['var(--font-mono)', ...fontFamily.mono],   // Use CSS var for primary mono font
+        mono: ['var(--font-mono)', ...fontFamily.mono], // Use CSS var for primary mono font
       },
 
       // --- Keyframes for Animations ---
@@ -87,13 +87,15 @@ const config: Config = {
           '0%,70%,100%': { opacity: '1' },
           '20%,50%': { opacity: '0' },
         },
-        'spin': { // Keep default spin or customize
-           from: { transform: 'rotate(0deg)' },
-           to: { transform: 'rotate(360deg)' },
+        spin: {
+          // Keep default spin or customize
+          from: { transform: 'rotate(0deg)' },
+          to: { transform: 'rotate(360deg)' },
         },
-        'pulse': { // Keep default pulse or customize
-           '0%, 100%': { opacity: '1' },
-           '50%': { opacity: '.5' },
+        pulse: {
+          // Keep default pulse or customize
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '.5' },
         },
       },
 
@@ -102,15 +104,14 @@ const config: Config = {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'caret-blink': 'caret-blink 1.25s ease-out infinite',
-        'spin': 'spin 1s linear infinite', // Example usage
-        'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite', // Example usage
+        spin: 'spin 1s linear infinite', // Example usage
+        pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite', // Example usage
       },
 
       // --- Background Images (keep yours) ---
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
     },
   },
