@@ -73,24 +73,6 @@ export async function fetchAllCompanies() {
   }
 }
 
-// Function to fetch active admin-defined checklist items
-export async function fetchActiveChecklistItems() {
-  try {
-    const checklistItems = await prisma.checklistItem.findMany({
-      where: {
-        isActive: true, // Only fetch active items
-      },
-      orderBy: {
-        id: 'asc', // Or order by text, etc.
-      },
-    });
-    return checklistItems;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch active checklist items.');
-  }
-}
-
 // Function to fetch a single design by its ID, including checklist items
 export async function getDesignById(id: number) {
   try {
@@ -98,18 +80,7 @@ export async function getDesignById(id: number) {
       where: { id },
       include: {
         company: true, // Include company details
-        checklistItems: {
-          // Include the associated checklist items
-          include: {
-            checklistItem: true, // Include the original admin checklist item text if linked
-            user: true, // Include user who last modified/checked the item
-          },
-          orderBy: {
-            // Optional: Define an order, e.g., admin items first, then custom, then by creation
-            checklistItemId: 'asc', // Puts items linked to ChecklistItem first (non-null IDs)
-            // createdAt: 'asc', // Then order by creation time
-          },
-        },
+        checklistItems: true, // Include checklist items
         // Include other relations if needed
       },
     });

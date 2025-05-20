@@ -5,13 +5,20 @@ import { deleteDesign } from '@/app/actions/deleteDesign';
 import { saveDesign } from '@/app/actions/saveDesign'; // Import saveDesign
 import { useState } from 'react'; // Import useState
 
-// Define props type including the checklistItems relation
+const inputClassNames = "border rounded px-2 py-1";
+const staticTextClassNames = "text-lg block font-medium";
+const labelClassNames = "text-sm font-light";
+const sectionBorderClassNames = "border border-gray-300 dark:border-gray-600 rounded";
+
+
+// Define props type including the checklistItems and company relations
 interface DesignDetailClientPageProps {
   design: Design & {
     checklistItems: (DesignChecklistItem & {
       checklistItem: ChecklistItem | null;
       user: User | null;
     })[];
+    company: { name: string }; // Add company relation
   };
 }
 
@@ -59,121 +66,109 @@ export default function DesignDetailClientPage({ design }: DesignDetailClientPag
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Design Details</h1> {/* Added styling */}
-      <div className="space-y-4"> {/* Added spacing */}
-        <p><strong>ID:</strong> {design.id}</p> {/* Added bolding */}
-        <div>
-          <strong>Template Name:</strong>{' '}
+      <div className="bg-card text-card-foreground w-full text-left shadow-lg p-6 rounded-md"> {/* Added spacing */}
+        <div className="border-lightEmphasisColor dark:border-darkEmphasisColor border-b mb-3"> {/* Added styling */}
+          <h2 className="text-lg text-card-foreground font-bold mb-0">{design.templateName}</h2>
+          <h3 className='text-sm font-thin text-card-foreground pt-0'>{design.company.name}</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div> {/* Added grid layout */}
+          <p className='text-sm font-light'>Template Name:{' '}
           {isEditing ? (
             <input
               type="text"
               name="templateName"
               value={editedDesign.templateName}
               onChange={handleChange}
-              className="border rounded px-2 py-1"
+              className={inputClassNames}
             />
           ) : (
-            <span>{design.templateName}</span>
+            <span className={staticTextClassNames}>{design.templateName}</span>
           )}
+          </p>
         </div>
         <div>
-          <strong>Status:</strong>{' '}
+          <p className={labelClassNames}>Status:{' '}
           {isEditing ? (
              <input
               type="text" // Consider using a select dropdown for status
               name="status"
               value={editedDesign.status}
               onChange={handleChange}
-              className="border rounded px-2 py-1"
+              className={inputClassNames}
             />
           ) : (
-            <span>{design.status}</span>
+            <span className={staticTextClassNames}>{design.status}</span>
           )}
+          </p>
         </div>
-        <p><strong>Created At:</strong> {design.createdAt.toDateString()}</p> {/* Added bolding */}
-        <p><strong>Updated At:</strong> {design.updatedAt.toDateString()}</p> {/* Added bolding */}
-        {/* Add other fields from the design model here */}
-         <div>
-          <strong>Company ID:</strong>{' '}
+        <div>
+          <p className={labelClassNames}>Company ID:{' '}
           {isEditing ? (
              <input
               type="text" // Consider using a select dropdown for company
               name="companyId"
               value={editedDesign.companyId}
               onChange={handleChange}
-              className="border rounded px-2 py-1"
+              className={inputClassNames}
             />
           ) : (
-            <span>{design.companyId}</span>
+            <span className={staticTextClassNames}>{design.companyId}</span>
           )}
+          </p>
         </div>
-         <div>
-          <strong>User ID:</strong>{' '}
+        <div>
+          <p className={labelClassNames}>Company Name:
+          
+            <span className={staticTextClassNames}>{design.company.name}</span>
+            </p>
+        </div>
+        <div>
+          <p className={labelClassNames}>User ID:{' '}
           {isEditing ? (
              <input
               type="text" // Consider using a select dropdown for user
               name="userId"
-              value={editedDesign.userId}
+              value={editedDesign.userId || ''}
               onChange={handleChange}
-              className="border rounded px-2 py-1"
+              className={inputClassNames}
             />
           ) : (
-            <span>{design.userId}</span>
+            <span className={staticTextClassNames}>{design.userId}</span>
           )}
+          </p>
         </div>
          <div>
-          <strong>Partners:</strong>{' '}
+          <p className={labelClassNames}>Partner:{' '}
           {isEditing ? (
              <input
               type="text"
               name="partners"
               value={editedDesign.partners || ''} // Handle null partners
               onChange={handleChange}
-              className="border rounded px-2 py-1"
+              className={inputClassNames}
             />
           ) : (
-            <span>{design.partners}</span>
+            <span className={staticTextClassNames}>{design.partners}</span>
           )}
+          </p>
         </div>
-        {/* Note ID might not be relevant to display directly */}
-        {/* <p><strong>Note ID:</strong> {design.noteId}</p> */}
+        <p className={labelClassNames}>Created At: <span className='block font-medium'>{design.createdAt.toDateString()}</span></p> {/* Added bolding */}
+        <p className={labelClassNames}>Updated At: <span className='block font-medium'>{design.updatedAt.toDateString()}</span></p> {/* Added bolding */}
 
-        {/* Display Checklist */}
-        <div className="border p-4 rounded border-gray-300 dark:border-gray-600"> {/* Added styling */}
-          <h2 className="text-lg font-semibold mb-3">Checklist</h2> {/* Added styling */}
-          {design.checklistItems && design.checklistItems.length > 0 ? (
-            <ul className="space-y-2"> {/* Added spacing */}
-              {design.checklistItems.map((item) => (
-                <li key={item.id} className="flex items-center space-x-2"> {/* Added styling */}
-                  <input
-                    type="checkbox"
-                    checked={item.isChecked}
-                    readOnly // Checklist is read-only on detail page
-                    className="form-checkbox h-5 w-5 text-blue-600 rounded" // Added styling
-                  />
-                  <span className="text-sm"> {/* Added styling */}
-                    {item.checklistItem?.text || item.customText}
-                    {item.user ? ' (Checked by: ' + (item.user.name || item.user.username) + ')' : null} {/* Display who checked */}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-gray-500">No checklist items for this design.</p> 
-        
-
-          )}
         </div>
+          
         <div>
-          <p><strong>Design Notes:</strong></p> {/* Added bolding */}
+          <p className={labelClassNames}>Design Notes:</p> {/* Added bolding */}
            {isEditing ? (
             <textarea
               name="designNotes"
               value={editedDesign.designNotes || ''} // Handle null notes
               onChange={handleChange}
-              className="border rounded px-2 py-1 w-full h-32" // Added styling
+              className={`${inputClassNames} w-full h-32`} // Added styling
             />
           ) : (
-            <div className="border p-3 rounded bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 whitespace-pre-wrap"> {/* Added styling and pre-wrap for notes */}
+            <div className={`${sectionBorderClassNames} p-3 bg-gray-100 dark:bg-gray-700 whitespace-pre-wrap`}> {/* Added styling and pre-wrap for notes */}
               {design.designNotes || 'No notes available.'}
             </div>
           )}

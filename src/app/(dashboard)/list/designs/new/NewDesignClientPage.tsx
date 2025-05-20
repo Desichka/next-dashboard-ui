@@ -1,52 +1,89 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  Company,
-  ChecklistItem,
-  Design,
-  DesignChecklistItem as DesignChecklistItemPrisma,
-  User,
-} from '@prisma/client'; // Import Prisma types
+
+// Define local interfaces mirroring necessary Prisma types
+interface LocalCompany {
+  id: number;
+  name: string;
+  // Add other fields from Prisma Company model if needed by this component
+}
+
+interface LocalUser {
+  id: string;
+  name: string | null;
+  username: string;
+  // Add other fields from Prisma User model if needed by this component
+}
+
+interface LocalDesignChecklistItem {
+  id: number;
+  checklistItemId: number | null;
+  designId: number;
+  isChecked: boolean;
+  customText: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  // Add other fields from Prisma DesignChecklistItem model if needed
+}
+
+interface LocalDesign {
+  id: number;
+  companyId: number;
+  templateName: string;
+  partners: string | null;
+  status: string; // Assuming status is a string enum or type
+  designNotes: string | null;
+  userId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  // Add other fields from Prisma Design model if needed by this component
+}
+
+
+// Define a type for checklist items used in the component state
+interface ChecklistItemState {
+  id?: number; // Optional for custom items (refers to initialChecklistItems id)
+  designChecklistItemId?: number; // ID if saved to the database (refers to DesignChecklistItem id)
+  text: string;
+  isChecked: boolean;
+  isCustom: boolean;
+  customText?: string; // Only for custom items
+}
+
+// Define a type for the Design data fetched with checklist items
+type DesignWithChecklistItems = LocalDesign & {
+  checklistItems: LocalDesignChecklistItem[];
+  company: { name: string } | null; // Include company as it's also included in the fetch
+};
+
+// Define the initial checklist items (example data)
+const initialChecklistItems = [
+  { id: 1, text: 'Review requirements' },
+  { id: 2, text: 'Create wireframes' },
+  { id: 3, text: 'Develop prototype' },
+  { id: 4, text: 'Get client feedback' },
+  { id: 5, text: 'Finalize design' },
+];
+
 import { saveDesign } from '@/app/actions/saveDesign'; // Import server action
 import { getDesignById, searchDesigns } from '@/lib/data'; // Import data fetching functions
 // TODO: Import actual UI components if using a library (e.g., Shadcn, Material UI)
 
-// Define props type using Prisma types
+// Define props type using local interfaces
 interface NewDesignClientPageProps {
-  companies: Company[];
-  initialChecklistItems: ChecklistItem[];
-  users: { id: string; name: string | null; username: string }[]; // Add users prop
+  companies: LocalCompany[];
+  users: LocalUser[]; // Use LocalUser type
 }
 
-// Type for the combined checklist item state used in the component
-interface ChecklistItemState {
-  id?: number; // ID from ChecklistItem model (for admin items)
-  designChecklistItemId?: number; // ID from the join table (DesignChecklistItem) when editing
-  customText?: string; // Text for custom items
-  text: string; // Display text (either from ChecklistItem or customText)
-  isChecked: boolean;
-  isCustom: boolean; // Flag to differentiate admin vs employee items
-}
-
-// Type for the full design data fetched for editing, using the correct field name 'designNotes'
-type FullDesignData = Design & {
-  company: Company; // Ensure company is included
-  checklistItems: (DesignChecklistItemPrisma & {
-    checklistItem: ChecklistItem | null;
-    user: User | null;
-  })[];
-};
-
-// Type for search results
-type DesignSearchResult = Design & {
+// Type for search results using local interfaces
+type DesignSearchResult = LocalDesign & {
   company: { name: string } | null;
 };
 
 const NewDesignClientPage: React.FC<NewDesignClientPageProps> = ({
   companies = [],
-  initialChecklistItems = [],
   users = [], // Add users to destructuring
 }) => {
   const router = useRouter();
@@ -84,7 +121,7 @@ const NewDesignClientPage: React.FC<NewDesignClientPageProps> = ({
       setIsLoading(true);
       console.log(`Fetching data for design ID: ${id}`);
       try {
-        const designData = await getDesignById(id); // Use the imported function
+        const designData: DesignWithChecklistItems | null = await getDesignById(id); // Use the imported function and new type
         console.log('Fetched design data:', designData);
 
         if (designData) {
@@ -100,7 +137,7 @@ const NewDesignClientPage: React.FC<NewDesignClientPageProps> = ({
           setAssignedUserId(designData.userId || ''); // Set assigned user ID
 
           // Populate checklist state based on designData.checklistItems
-          const fetchedChecklistItems = designData.checklistItems || [];
+          const fetchedChecklistItems: LocalDesignChecklistItem[] = designData.checklistItems || [];
           const adminChecklistMap = new Map(initialChecklistItems.map((item) => [item.id, item]));
           const designChecklistMap = new Map(
             fetchedChecklistItems.map((item) => [item.checklistItemId, item])
@@ -150,7 +187,7 @@ const NewDesignClientPage: React.FC<NewDesignClientPageProps> = ({
         setIsLoading(false);
       }
     },
-    [initialChecklistItems, router]
+    [initialChecklistItems, router, companies] // Added companies to dependencies
   ); // Added dependencies
 
   const handleSearch = useCallback(async (term: string) => {
